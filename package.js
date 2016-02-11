@@ -2,7 +2,7 @@ Package.describe({
   name: 'epfl:accounts-tequila',
   version: '0.0.1',
   // Brief, one-line summary of the package.
-  summary: 'Log in to Web apps using [Tequila](http://tequila.epfl.ch/)',
+  summary: 'Log in to Web apps using EPFL\'s [Tequila](http://tequila.epfl.ch/)',
   // URL to the Git repository containing the source code for this package.
   git: 'https://github.com/epfl-sti/accounts-tequila',
   // By default, Meteor will default to using README.md for documentation.
