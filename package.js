@@ -15,6 +15,7 @@ Package.onUse(function(api) {
   api.use('ecmascript');
   api.use('accounts-base');
   api.use('webapp');
+  api.use('tomwasd:history-polyfill');
   api.addFiles('accounts-tequila-client.js', ['client']);
   api.addFiles('accounts-tequila-server.js', ['server']);
   api.export("Tequila");

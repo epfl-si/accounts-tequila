@@ -9,10 +9,22 @@ Tequila = {
     client: "meteor-accounts-tequila",
     autoStart: true,
     bypass: ["/app/", "/merged-stylesheets.css", "/packages/", "/lib/",
-      "/tap-i18n/", "/favicon.ico"],
+      "/tap-i18n/", "/error-stack-parser.min.js.map", "/favicon.ico"],
     control: ["/"]
   }
 };
+
+if (WebApp.categorizeRequest) {
+  var categorizeRequestOrig = WebApp.categorizeRequest;
+  WebApp.categorizeRequest = function(req) {
+    return _.extend(categorizeRequestOrig(req),
+      {tequila: req.tequila});
+  }
+}
+WebApp.addHtmlAttributeHook(function(req) {
+  if (! (req.tequila && req.tequila.redirected)) return null;
+  return { "tequila-redirected": "1" };
+});
 
 function tequilaRedirectOrAuthenticate(req, res, next, protocol) {
   if (req.query && req.query.key) {
@@ -22,8 +34,8 @@ function tequilaRedirectOrAuthenticate(req, res, next, protocol) {
         next(error);
         return;
       }
+      req.tequila = {redirected: true};
       // TODO: Meteor needs to be told about this somehow.
-      req.tequila = results;
       next();
     });
   } else {
