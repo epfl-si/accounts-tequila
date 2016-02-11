@@ -8,7 +8,8 @@ Tequila = {
   options: {
     client: "meteor-accounts-tequila",
     autoStart: true,
-    bypass: ["/app", "/merged-stylesheets.css", "/packages", "/favicon.ico"],
+    bypass: ["/app/", "/merged-stylesheets.css", "/packages/", "/lib/",
+      "/favicon.ico"],
     control: ["/"]
   }
 };
