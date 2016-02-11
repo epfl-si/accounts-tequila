@@ -9,7 +9,7 @@ Tequila = {
     client: "meteor-accounts-tequila",
     autoStart: true,
     bypass: ["/app/", "/merged-stylesheets.css", "/packages/", "/lib/",
-      "/favicon.ico"],
+      "/tap-i18n/", "/favicon.ico"],
     control: ["/"]
   }
 };
