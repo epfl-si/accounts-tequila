@@ -47,6 +47,7 @@ Tequila.start = function start() {
       next();
     });
   });
+  connect.use(Npm.require('connect-query')());
   var protocol = new Protocol();
   _.extend(protocol, Tequila.options);
   _.each(Tequila.options.control, function(url) {
