@@ -29,5 +29,6 @@ Package.onTest(function(api) {
 
 Npm.depends({
   "connect": "3.4.1",
+  "debug": "2.2.0",
   "passport-tequila": "https://codeload.github.com/epfl-sti/passport-tequila/tar.gz/2434a46a829df7308c4581bbed403e6b2c07d784"
 });

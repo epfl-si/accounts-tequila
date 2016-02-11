@@ -1,11 +1,8 @@
 /**
  * Authenticate against EPFL's Tequila system
  */
-var Protocol = Npm.require("passport-tequila/lib/passport-tequila/protocol.js");
-
-function debug(msg) {
-  console.log("accounts-tequila-server: " + msg);
-}
+var Protocol = Npm.require("passport-tequila/lib/passport-tequila/protocol.js"),
+  debug = Npm.require("debug")("accounts-tequila");
 
 Tequila = {
   options: {
