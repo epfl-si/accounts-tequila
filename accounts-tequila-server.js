@@ -26,7 +26,7 @@ if (WebApp.categorizeRequest) {
 }
 WebApp.addHtmlAttributeHook(function(req) {
   if (! req.tequila) return null;
-  return { "ejson-tequila": EJSON.stringify(req.tequila) };
+  return { "ejson-tequila": EJSON.stringify(_.omit(req.tequila, "key")) };
 });
 
 function tequilaRedirectOrAuthenticate(req, res, next, protocol) {
