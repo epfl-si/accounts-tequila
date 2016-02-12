@@ -11,6 +11,9 @@ Tequila = {
     bypass: ["/app/", "/merged-stylesheets.css", "/packages/", "/lib/",
       "/tap-i18n/", "/error-stack-parser.min.js.map", "/favicon.ico"],
     control: ["/"]
+  },
+  get: function() {
+    var X = 1;
   }
 };
 
@@ -22,8 +25,8 @@ if (WebApp.categorizeRequest) {
   }
 }
 WebApp.addHtmlAttributeHook(function(req) {
-  if (! (req.tequila && req.tequila.redirected)) return null;
-  return { "tequila-redirected": "1" };
+  if (! req.tequila) return null;
+  return { "ejson-tequila": EJSON.stringify(req.tequila) };
 });
 
 function tequilaRedirectOrAuthenticate(req, res, next, protocol) {
@@ -34,7 +37,7 @@ function tequilaRedirectOrAuthenticate(req, res, next, protocol) {
         next(error);
         return;
       }
-      req.tequila = {redirected: true};
+      req.tequila = _.extend({redirected: true}, results);
       // TODO: Meteor needs to be told about this somehow.
       next();
     });
