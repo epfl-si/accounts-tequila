@@ -17,7 +17,10 @@ Package.onUse(function(api) {
   api.use('accounts-base');
   api.use('underscore');
   api.use('webapp');
+  api.use('reactive-var');
   api.use('tomwasd:history-polyfill');
+  api.use('iron:router', {weak: true});
+  api.addFiles('accounts-tequila-common.js');
   api.addFiles('accounts-tequila-client.js', ['client']);
   api.addFiles('accounts-tequila-server.js', ['server']);
   api.export("Tequila");
@@ -34,5 +37,5 @@ Npm.depends({
   "connect": "3.4.1",
   "connect-query": "0.2.0",
   "debug": "2.2.0",
-  "passport-tequila": "https://codeload.github.com/epfl-sti/passport-tequila/tar.gz/2434a46a829df7308c4581bbed403e6b2c07d784"
+  "passport-tequila": "https://codeload.github.com/epfl-sti/passport-tequila/tar.gz/ca13a5710909c94b66dde581da93fc79f79538a8"
 });

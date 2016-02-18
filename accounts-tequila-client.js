@@ -10,26 +10,30 @@
  *   which the server can pass data to clients without DDP).
  *
  */
-Tequila = {
-  options: {},   // Options matter only on the server
-  get: _.memoize(function() {
-    var ejson = $('html').attr('ejson-tequila');
-    return ejson ? EJSON.parse(ejson) : undefined;
-  })
+
+var tequilaInfo = new ReactiveVar();
+Tequila.get = _.bind(tequilaInfo.get, tequilaInfo);
+
+Tequila.start = function() {
+  var queryString = window.location.search;
+  if (! queryString) return;
+  var sessionKey;
+  var locationWithoutTequilaKey = window.location.pathname +
+    queryString.replace(/([?&])key=([^&]*)(&|$)/,
+      function(matched, sep1, key, sep2) {
+        sessionKey = key;
+        return sep2 ? sep1 : "";   // Although in practice it looks like
+                                   // the Tequila key is always last
+      });
+  if (sessionKey) {
+    window.history.replaceState({}, window.title, locationWithoutTequilaKey);
+    tryAuthenticate(sessionKey);
+  }
 };
 
-Meteor.startup(function() {
-  if (Tequila.get() && Tequila.get().redirected) {
-    var locationWithoutTequilaKey = window.location.pathname,
-        queryString = window.location.search;
-    if (queryString) {
-      locationWithoutTequilaKey = locationWithoutTequilaKey +
-        queryString.replace(/([?&])key=([^&]*)(&|$)/,
-          function(matched, sep1, key, sep2) {
-            return sep2 ? sep1 : "";   // Although in practice it looks like
-                                       // the Tequila key is always last
-          });
-    }
-    window.history.replaceState({}, window.title, locationWithoutTequilaKey);
-  }
-});
+function tryAuthenticate(sessionKey) {
+  Meteor.call("tequila.authenticate", sessionKey,
+    function (error, teqStruct) {
+      tequilaInfo.set(teqStruct)
+    });
+}
