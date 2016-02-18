@@ -66,15 +66,6 @@ Tequila.start = function startServer() {
   }});
 };
 
-function sleep(ms) {
-  var Fiber = Npm.require("fibers"),
-    fiber = Fiber.current;
-  setTimeout(function() {
-    fiber.run();
-  }, ms);
-  Fiber.yield();
-}
-
 function asyncSetIdFromResults(cb) {
   var context = this;
   var done = _.once(function (error, id) {
