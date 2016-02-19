@@ -2,7 +2,8 @@
  * Authenticate against EPFL's Tequila system
  */
 var Protocol = Npm.require("passport-tequila/lib/passport-tequila/protocol.js"),
-  debug = Npm.require("debug")("accounts-tequila");
+  debug = Npm.require("debug")("accounts-tequila"),
+  Future = Meteor.npmRequire('fibers/future');
 
 function tequilaRedirectHTTP(req, res, next, protocol) {
   if (req.query && req.query.key) {
@@ -53,42 +54,49 @@ Tequila.start = function startServer() {
   });
   WebApp.rawConnectHandlers.use(connect);
 
-  Meteor.methods({"tequila.authenticate": function(key) {
+  Accounts.registerLoginHandler(function(options) {
+    var key = options.tequilaKey;
+    if (! key) return undefined;
     debug("tequila.authenticate with key=" + key);
-    var results = Meteor.wrapAsync(_.bind(
-      protocol.fetchattributes, protocol, key))();
-    // For some reason, this.setUserId() can only be called from a Fiber:
-    Meteor.wrapAsync(asyncSetIdFromResults,
-      {setUserId: _.bind(this.setUserId, this), results: results})();
-    debug("tequila.authenticate successful, user ID is now " + this.userId);
-
-    return results;
-  }});
-};
-
-function asyncSetIdFromResults(cb) {
-  var context = this;
-  var done = _.once(function (error, id) {
-    if (error) {
-      cb(error);
-    } else {
-      context.setUserId(id);
-      cb(null);
+    try {
+      function fetchattributes(cb) {
+        return protocol.fetchattributes(key, cb);
+      }
+      var results = Meteor.wrapAsync(fetchattributes)();
+    } catch (e) {
+      debug("fetchattributes error:", e);
+      return { error: e };
+    }
+    try {
+      var userId = getIdFromResults(results);
+      debug("tequila.authenticate successful, user ID is " + userId);
+      return { userId: userId };
+    } catch (e) {
+      return { error: e };
     }
   });
-  var loggedInUser = Tequila.options.getUserId(context.results);
+};
+
+function getIdFromResults(results) {
+  var loggedInUser = Tequila.options.getUserId(results);
   if (loggedInUser.forEach) { // Cursor
+    var returned = new Future;
     loggedInUser.forEach(function (error, value) {
       if (error) {
-        done(error);
+        if (! returned.isResolved()) {
+          returned.throw(error);
+        }
       } else {
-        done(null, value._id);
+        if (! returned.isResolved()) {
+          returned.return(value);
+        }
       }
     });
+    return returned.wait();
   } else if (loggedInUser._id) {
-    done(null, loggedInUser._id);
+    return loggedInUser._id;
   } else {
-    done(null, loggedInUser);
+    return loggedInUser;
   }
 }
 

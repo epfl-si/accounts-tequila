@@ -14,26 +14,27 @@
 var tequilaInfo = new ReactiveVar();
 Tequila.get = _.bind(tequilaInfo.get, tequilaInfo);
 
-Tequila.start = function() {
+Tequila.start = function startClient() {
   var queryString = window.location.search;
   if (! queryString) return;
-  var sessionKey;
+  var tequilaKey;
   var locationWithoutTequilaKey = window.location.pathname +
     queryString.replace(/([?&])key=([^&]*)(&|$)/,
       function(matched, sep1, key, sep2) {
-        sessionKey = key;
+        tequilaKey = key;
         return sep2 ? sep1 : "";   // Although in practice it looks like
                                    // the Tequila key is always last
       });
-  if (sessionKey) {
+  if (tequilaKey) {
     window.history.replaceState({}, window.title, locationWithoutTequilaKey);
-    tryAuthenticate(sessionKey);
+    Accounts.callLoginMethod({
+      methodArguments: [{tequilaKey: tequilaKey}],
+    });
   }
 };
 
-function tryAuthenticate(sessionKey) {
-  Meteor.call("tequila.authenticate", sessionKey,
-    function (error, teqStruct) {
-      tequilaInfo.set(teqStruct)
-    });
-}
+Accounts.onLoginFailure(function() {
+  // We sent a Tequila key to the server and it told us that it was bad.
+  // Confused we are. Reload the entire app.
+  window.location.href = "/";
+});
