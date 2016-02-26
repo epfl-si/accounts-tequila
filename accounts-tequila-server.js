@@ -69,6 +69,10 @@ Tequila.start = function startServer() {
     }
     try {
       var userId = getIdFromResults(results);
+      if (! userId) {
+        debug("User unknown!", results);
+        return { error: new Meteor.Error("TEQUILA_USER_UNKNOWN") };
+      }
       debug("tequila.authenticate successful, user ID is " + userId);
       return { userId: userId };
     } catch (e) {
@@ -79,6 +83,9 @@ Tequila.start = function startServer() {
 
 function getIdFromResults(results) {
   var loggedInUser = Tequila.options.getUserId(results);
+  if (! loggedInUser) {
+    return undefined;
+  }
   if (loggedInUser.forEach) { // Cursor
     var returned = new Future;
     loggedInUser.forEach(function (error, value) {

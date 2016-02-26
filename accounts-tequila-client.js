@@ -14,6 +14,14 @@
 var tequilaInfo = new ReactiveVar();
 Tequila.get = _.bind(tequilaInfo.get, tequilaInfo);
 
+var __ = function(/* args */) {
+  if (Package['tap-i18n']) {
+    return TAPi18n.__.apply(TAPi18n, arguments);
+  } else {
+    return arguments[0];
+  }
+};
+
 Tequila.start = function startClient() {
   var queryString = window.location.search;
   if (! queryString) return;
@@ -29,6 +37,15 @@ Tequila.start = function startClient() {
     window.history.replaceState({}, window.title, locationWithoutTequilaKey);
     Accounts.callLoginMethod({
       methodArguments: [{tequilaKey: tequilaKey}],
+      userCallback: function(result) {
+        if (result instanceof Error) {
+          if (result instanceof Meteor.Error) {
+            alert(__(result.error));
+          } else {
+            alert(result);
+          }
+        }
+      }
     });
   }
 };
