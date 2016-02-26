@@ -36,21 +36,24 @@ Tequila.start = function startServer() {
   }
 
   var connect = Npm.require('connect')();
-  _.each(Tequila.options.bypass, function (url) {
-    connect.use(url, function (req, res, next) {
-      req.tequila = {whitelisted: true};
-      next();
-    });
-  });
   connect.use(Npm.require('connect-query')());
-  _.each(Tequila.options.control, function (url) {
-    connect.use(url, function (req, res, next) {
-      if (req.tequila && req.tequila.whitelisted) {
-        next();
-        return;
-      }
+  connect.use(function(req, res, next) {
+    function matches(url, pattern) {
+      if (0 != url.indexOf(pattern)) { return false; }
+      if (pattern[pattern.length - 1] === "/") { return true; }
+      url = url.replace(/\?.*$/,"");
+      return (pattern === url);
+    }
+    if (_.find(Tequila.options.bypass, matches.bind({}, req.originalUrl))) {
+      debug("Request to " + req.originalUrl + " bypasses Tequila");
+      next();
+    } else if (_.find(Tequila.options.control,
+        matches.bind({}, req.originalUrl))) {
       tequilaRedirectHTTP(req, res, next, protocol);
-    });
+    } else {
+      debug("Request to " + req.originalUrl + " falls through");
+      next();
+    }
   });
   WebApp.rawConnectHandlers.use(connect);
 
