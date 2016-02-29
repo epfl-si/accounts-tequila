@@ -45,13 +45,13 @@ Tequila.start = function startServer() {
       return (pattern === url);
     }
     if (_.find(Tequila.options.bypass, matches.bind({}, req.originalUrl))) {
-      debug("Request to " + req.originalUrl + " bypasses Tequila");
+      debug("Bypassing Tequila for request to " + req.originalUrl);
       next();
     } else if (_.find(Tequila.options.control,
         matches.bind({}, req.originalUrl))) {
       tequilaRedirectHTTP(req, res, next, protocol);
     } else {
-      debug("Request to " + req.originalUrl + " falls through");
+      debug("Fall-through (no matched rule) for request to " + req.originalUrl);
       next();
     }
   });
