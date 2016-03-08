@@ -8,12 +8,9 @@ var Protocol = Npm.require("passport-tequila/lib/passport-tequila/protocol.js"),
 function tequilaRedirectHTTP(req, res, next, protocol) {
   if (req.query && req.query.key) {
     debug("Looks like user is back from Tequila, with key=" + req.query.key);
-    // Do *NOT* resolve the key with the Tequila server just yet. That key is
-    // single-use; and we'd rather associate the Tequila credentials with the
-    // Meteor session, rather than the current one-shot HTTP query which will be
-    // closed soon. Since the client is going to see the key in the URL anyway,
-    // let it pass it back to us through a "tequila.authenticate" Meteor.call,
-    // and we'll validate it then (see below).
+    // Do *NOT* resolve the key with the Tequila server just yet; let the client
+    // do that (we want the DDP session to be authenticated, not the HTTP
+    // session which is typically powerless and will be closed soon)
     next();
   } else {
     var url = req.originalUrl;
