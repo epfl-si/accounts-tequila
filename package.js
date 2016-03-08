@@ -19,7 +19,6 @@ Package.onUse(function(api) {
   api.use('webapp');
   api.use('reactive-var');
   api.use('tomwasd:history-polyfill');
-  api.use('tap:i18n', {weak: true});
   api.addFiles('accounts-tequila-common.js');
   api.addFiles('accounts-tequila-client.js', ['client']);
   api.addFiles('accounts-tequila-server.js', ['server']);
