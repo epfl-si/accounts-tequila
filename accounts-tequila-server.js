@@ -58,14 +58,24 @@ Tequila.start = function startServer() {
     var key = options.tequilaKey;
     if (! key) return undefined;
     debug("tequila.authenticate with key=" + key);
-    try {
-      function fetchattributes(cb) {
-        return protocol.fetchattributes(key, cb);
+    var results, error;
+    function fetchattributes(cb) {
+      try {
+        results = protocol.fetchattributes(key, cb);
+      } catch (e) {
+        debug("fetchattributes error:", e);
+        error = e;
       }
-      var results = Meteor.wrapAsync(fetchattributes)();
-    } catch (e) {
-      debug("fetchattributes error:", e);
-      return { error: e };
+    }
+    Meteor.wrapAsync(fetchattributes)();
+    if (error) {
+      debug("fetchattributes RPC to Tequila server failed", error);
+      return {
+        error: new Meteor.Error(
+          "TEQUILA_FETCHATTRIBUTES_FAILED",
+          "fetchattributes RPC to Tequila server failed",
+          String(error))
+      };
     }
     try {
       var userId = getIdFromResults(results);
