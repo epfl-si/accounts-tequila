@@ -49,9 +49,3 @@ Tequila.start = function startClient() {
     });
   }
 };
-
-Accounts.onLoginFailure(function() {
-  // We sent a Tequila key to the server and it told us that it was bad.
-  // Confused we are. Reload the entire app.
-  window.location.href = "/";
-});
