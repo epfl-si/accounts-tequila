@@ -44,7 +44,7 @@ Tequila.start = function startClient() {
                                    // the Tequila key is always last
       });
   if (tequilaKey) {
-    window.history.replaceState({}, window.title, locationWithoutTequilaKey);
+    window.History.replaceState({}, window.title, locationWithoutTequilaKey);
     Accounts.callLoginMethod({
       methodArguments: [{tequilaKey: tequilaKey}],
       userCallback: function(result) {

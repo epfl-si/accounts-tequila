@@ -18,7 +18,7 @@ Package.onUse(function(api) {
   api.use('underscore');
   api.use('webapp');
   api.use('reactive-var');
-  api.use('tomwasd:history-polyfill');
+  api.use('jquery-history');
   api.addFiles('accounts-tequila-common.js');
   api.addFiles('accounts-tequila-client.js', ['client']);
   api.addFiles('accounts-tequila-server.js', ['server']);
