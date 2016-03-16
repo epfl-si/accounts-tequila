@@ -1,4 +1,4 @@
-/**
+/*
  * Authenticate against EPFL's Tequila system
  *
  * Authentication is best left to servers; here we just
@@ -12,6 +12,11 @@
  */
 
 var tequilaInfo = new ReactiveVar();
+/**
+ * Reactively obtain the current Tequila state
+ *
+ * @locus Client
+ */
 Tequila.get = _.bind(tequilaInfo.get, tequilaInfo);
 
 function defaultServerErrorHandler(error) {
@@ -22,6 +27,11 @@ function defaultServerErrorHandler(error) {
   }
 }
 
+/**
+ * Start the server-side parts of Tequila authentication
+ *
+ * @locus Server
+ */
 Tequila.start = function startClient() {
   var queryString = window.location.search;
   if (! queryString) return;

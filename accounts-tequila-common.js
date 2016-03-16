@@ -1,4 +1,8 @@
+/** @class */
 Tequila = {
+  /**
+   * Options applied by {@link #tequila-start Tequila.start()}
+   */
   options: {
     client: "meteor-accounts-tequila",
     autoStart: true,

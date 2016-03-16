@@ -1,4 +1,4 @@
-/**
+/*
  * Authenticate against EPFL's Tequila system
  */
 var Protocol = Npm.require("passport-tequila/lib/passport-tequila/protocol.js"),
