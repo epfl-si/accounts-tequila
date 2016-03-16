@@ -1,7 +1,7 @@
 /** @class */
 Tequila = {
   /**
-   * Options applied by {@link #tequila-start Tequila.start()}
+   * Options applied by {@link #Tequila.start}
    */
   options: {
     client: "meteor-accounts-tequila",

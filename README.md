@@ -24,7 +24,7 @@ Reactively obtain the current Tequila state
 <a name="Tequila.options"></a>
 
 ### Tequila.options
-Options applied by [Tequila.start()](#tequila-start)
+Options applied by [#Tequila.start](#Tequila.start)
 
 **Kind**: static property of <code>[Tequila](#Tequila)</code>  
 <a name="Tequila.start"></a>
