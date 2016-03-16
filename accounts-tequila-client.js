@@ -28,9 +28,7 @@ function defaultServerErrorHandler(error) {
 }
 
 /**
- * Start the server-side parts of Tequila authentication
- *
- * @locus Server
+ * Start Tequila authentication
  */
 Tequila.start = function startClient() {
   var queryString = window.location.search;
