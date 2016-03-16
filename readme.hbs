@@ -1,4 +1,4 @@
-Log in to Web apps using EPFL\'s Tequila
+Control access to a Meteor Web app using EPFL's Tequila authentication system
 
 Like the [passport-tequila npm](https://www.npmjs.com/package/passport-tequila), but for Meteor
 

@@ -30,7 +30,8 @@ Options applied by [#Tequila.start](#Tequila.start)
 <a name="Tequila.start"></a>
 
 ### Tequila.start()
-Start the server-side parts of Tequila authentication
+Start Tequila authentication
+
+Called automatically unless `Tequila.options.autoStart` is false.
 
 **Kind**: static method of <code>[Tequila](#Tequila)</code>  
-**Locus**: Server  

@@ -29,6 +29,8 @@ function defaultServerErrorHandler(error) {
 
 /**
  * Start Tequila authentication
+ *
+ * Called automatically unless `Tequila.options.autoStart` is false.
  */
 Tequila.start = function startClient() {
   var queryString = window.location.search;
