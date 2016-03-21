@@ -3,7 +3,7 @@
  */
 var Protocol = Npm.require("passport-tequila/lib/passport-tequila/protocol.js"),
   debug = Npm.require("debug")("accounts-tequila"),
-  Future = Meteor.npmRequire('fibers/future');
+  Future = Npm.require('fibers/future');
 
 function tequilaRedirectHTTP(req, res, next, protocol) {
   if (req.query && req.query.key) {
