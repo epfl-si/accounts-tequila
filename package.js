@@ -36,6 +36,5 @@ Npm.depends({
   "connect": "3.4.1",
   "connect-query": "0.2.0",
   "debug": "2.2.0",
-  "fibers": "1.0.7",
   "passport-tequila": "https://codeload.github.com/epfl-sti/passport-tequila/tar.gz/c3eaae77c9dc702801431815ee9d059b4c4994cf"
 });
