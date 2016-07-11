@@ -117,14 +117,14 @@ function setupFakeLocalServer(configForFake, protocol) {
       + port);
     protocol.tequila_host = "localhost";
     protocol.tequila_port = port;
-    protocol.agent = new https.Agent({ca: fakes.certificate});
+    protocol.agent = new https.Agent({ca: fakes.getCACert()});
   } else if (configForFake === true) {
     // TODO: This doesn't actually work, because the devDependencies of
     // FakeTequilaServer are not available.
     var fakeTequilaServer = Tequila.fakeLocalServer =
       new FakeTequilaServer();
     Meteor.wrapAsync(fakeTequilaServer.start)();
-    console.log("Fake Tequila server listening at " +
+    console.log("Will use fake Tequila server at " +
       "https://localhost:" + Tequila.fakeTequilaServer.port + "/");
     _.extend(protocol, fakeTequilaServer.getOptions());
   } else {
