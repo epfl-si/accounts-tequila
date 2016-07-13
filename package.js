@@ -28,7 +28,7 @@ Package.onUse(function(api) {
 Package.onTest(function(api) {
   api.use('ecmascript');
   api.use('tinytest');
-  api.use('epfl:accounts-tequila');
+  api.use('epfl:accounts-tequila@0.1.10');
   api.addFiles('accounts-tequila-tests.js');
 });
 
