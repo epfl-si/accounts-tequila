@@ -28,7 +28,6 @@ Package.onUse(function(api) {
 Package.onTest(function(api) {
   api.use('ecmascript');
   api.use('tinytest');
-  api.use('epfl:accounts-tequila@0.1.10');
   api.addFiles('accounts-tequila-tests.js');
 });
 
@@ -36,5 +35,5 @@ Npm.depends({
   "connect": "3.4.1",
   "connect-query": "0.2.0",
   "debug": "2.2.0",
-  "passport-tequila": "https://codeload.github.com/epfl-sti/passport-tequila/tar.gz/c3eaae77c9dc702801431815ee9d059b4c4994cf"
+  "passport-tequila": "0.1.10"
 });
