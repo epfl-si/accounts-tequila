@@ -113,10 +113,11 @@ function setupFakeLocalServer(configForFake, protocol) {
     FakeTequilaServer = fakes.TequilaServer;
   if ("port" in configForFake) {
     var https = Npm.require("https");
-    var port = configForFake.port;
-    console.log("Using fake Tequila server already running at port "
-      + port);
-    protocol.tequila_host = "localhost";
+    var ip = getIpOfInterface(configForFake.networkInterface) || "localhost",
+      port = configForFake.port;
+    console.log("Using fake Tequila server on " + ip +
+      " already running at port " + port);
+    protocol.tequila_host = ip;
     protocol.tequila_port = port;
     protocol.agent = new https.Agent({ca: fakes.getCACert()});
   } else if (configForFake === true) {
@@ -131,5 +132,15 @@ function setupFakeLocalServer(configForFake, protocol) {
   } else {
     throw new Error("setupFakeLocalServer: " +
       "unable to determine what to do for config " + configForFake);
+  }
+}
+
+function getIpOfInterface(iface) {
+  var ifaceDef =  os.networkInterfaces()[iface];
+  var addressStruct = _.find(ifaceDef || [], function (addressStruct) {
+    return addressStruct.family === "IPv4";
+  });
+  if (addressStruct) {
+    return addressStruct.address;
   }
 }
