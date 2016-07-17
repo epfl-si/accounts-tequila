@@ -1,9 +1,10 @@
 /*
  * Authenticate against EPFL's Tequila system
  */
-var Protocol = Npm.require("passport-tequila/lib/passport-tequila/protocol.js"),
-  debug = Npm.require("debug")("accounts-tequila"),
-  Future = Npm.require('fibers/future');
+var os = require("os"),
+  Protocol = require("passport-tequila/lib/passport-tequila/protocol.js"),
+  debug = require("debug")("accounts-tequila"),
+  Future = require('fibers/future');
 
 function tequilaRedirectHTTP(req, res, next, protocol) {
   if (req.query && req.query.key) {
