@@ -11,7 +11,8 @@ Tequila = {
       return Meteor.users.findOne({sciper: tequilaResponse.uniqueid});
     },
     bypass: ["/app/", "/merged-stylesheets.css", "/packages/", "/lib/",
-      "/tap-i18n/", "/error-stack-parser.min.js.map", "/favicon.ico"],
+      "/tap-i18n/", "/error-stack-parser.min.js.map", "/favicon.ico",
+    "/*.map"],
     control: ["/"],
     onServerError: undefined
   }

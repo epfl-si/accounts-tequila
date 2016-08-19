@@ -33,14 +33,12 @@ Tequila.start = function startServer() {
     setupFakeLocalServer(Tequila.options.fakeLocalServer, protocol);
   }
 
-  var connect = Npm.require('connect')();
+  var connect = Npm.require('connect')(),
+    mm = Npm.require("micromatch");
   connect.use(Npm.require('connect-query')());
   connect.use(function(req, res, next) {
     function matches(url, pattern) {
-      if (0 != url.indexOf(pattern)) { return false; }
-      if (pattern[pattern.length - 1] === "/") { return true; }
-      url = url.replace(/\?.*$/,"");
-      return (pattern === url);
+      return !!(mm([url], pattern).length);
     }
     if (_.find(Tequila.options.bypass, matches.bind({}, req.originalUrl))) {
       debug("Bypassing Tequila for request to " + req.originalUrl);
