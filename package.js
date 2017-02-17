@@ -31,6 +31,5 @@ Npm.depends({
   "connect": "3.4.1",
   "connect-query": "0.2.0",
   "debug": "2.2.0",
-  "passport-tequila": "0.1.10",
-  "micromatch": "2.3.11"
+  "passport-tequila": "0.1.10"
 });

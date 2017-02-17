@@ -1,14 +1,9 @@
-/*
+/**
  * Authenticate against EPFL's Tequila system
  *
- * Authentication is best left to servers; here we just
- *
- * + remove the ?key= in the URL query fragment added by Tequila upon
- *   redirecting back;
- * + decode the Tequila authentication details from the ejson-tequila=
- *   attribute of the <html> node (it being the only channel through
- *   which the server can pass data to clients without DDP).
- *
+ * Authentication is best left to servers; here we just remove the
+ * ?key= in the URL query fragment added by Tequila upon redirecting
+ * back, and pass it to Meteor's Accounts.callLoginMethod().
  */
 
 var tequilaInfo = new ReactiveVar();
@@ -18,14 +13,6 @@ var tequilaInfo = new ReactiveVar();
  * @locus Client
  */
 Tequila.get = _.bind(tequilaInfo.get, tequilaInfo);
-
-function defaultServerErrorHandler(error) {
-  if (error instanceof Meteor.Error) {
-    alert(error.message);
-  } else {
-    alert(error);
-  }
-}
 
 /**
  * Start Tequila authentication
@@ -49,10 +36,12 @@ Tequila.start = function startClient() {
       methodArguments: [{tequilaKey: tequilaKey}],
       userCallback: function(result) {
         if (result instanceof Error) {
-          if (Tequila.options.onServerError) {
-            Tequila.options.onServerError(result);
+          if (Tequila.options.onClientError) {
+            Tequila.options.onClientError(result);
+          } else if (error instanceof Meteor.Error) {
+            alert(error.message);
           } else {
-            defaultServerErrorHandler(result);
+            alert(error);
           }
         }
       }

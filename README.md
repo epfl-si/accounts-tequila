@@ -32,6 +32,6 @@ Options applied by [#Tequila.start](#Tequila.start)
 ### Tequila.start()
 Start Tequila authentication
 
-Called automatically unless `Tequila.options.autoStart` is false.
+Called automatically on both client and server, unless `Tequila.options.autoStart` is false.
 
 **Kind**: static method of <code>[Tequila](#Tequila)</code>  

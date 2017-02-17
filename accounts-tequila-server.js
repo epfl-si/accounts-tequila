@@ -6,82 +6,144 @@ var os = require("os"),
   debug = require("debug")("accounts-tequila"),
   Future = require('fibers/future');
 
-function tequilaRedirectHTTP(req, res, next, protocol) {
-  if (req.query && req.query.key) {
-    debug("Looks like user is back from Tequila, with key=" + req.query.key);
-    // Do *NOT* resolve the key with the Tequila server just yet; let the client
-    // do that (we want the DDP session to be authenticated, not the HTTP
-    // session which is typically powerless and will be closed soon)
-    next();
-  } else {
-    var url = req.originalUrl;
-    protocol.createrequest(req, res, function (err, results) {
-      if (err) {
-        next(err);
-      } else {
-        debug("Redirecting user to Tequila for " + url);
-        protocol.requestauth(res, results);
-      }
-    });
-  }
-}
+const SESSION_CACHE_EXPIRY_MS = 30 * 1000;
+
 
 Tequila.start = function startServer() {
+  var tequilaServer = new TequilaServer();
+  tequilaServer.installRawConnectHandler(WebApp.rawConnectHandlers);
+  Accounts.registerLoginHandler(tequilaServer.meteorLoginHandler);
+};
+
+
+/**
+ *
+ * @returns TequilaServer object
+ * @constructor
+ */
+function TequilaServer() {
   var protocol = new Protocol();
   _.extend(protocol, Tequila.options);
   if (Tequila.options.fakeLocalServer) {
     setupFakeLocalServer(Tequila.options.fakeLocalServer, protocol);
   }
 
-  var connect = Npm.require('connect')(),
-    mm = Npm.require("micromatch");
-  connect.use(Npm.require('connect-query')());
-  connect.use(function(req, res, next) {
-    function matches(url, pattern) {
-      return !!(mm([url], pattern).length);
-    }
-    if (_.find(Tequila.options.bypass, matches.bind({}, req.originalUrl))) {
-      debug("Bypassing Tequila for request to " + req.originalUrl);
-      next();
-    } else if (_.find(Tequila.options.control,
-        matches.bind({}, req.originalUrl))) {
-      tequilaRedirectHTTP(req, res, next, protocol);
-    } else {
-      debug("Fall-through (no matched rule) for request to " + req.originalUrl);
-      next();
-    }
-  });
-  WebApp.rawConnectHandlers.use(connect);
+  var _sessionCache = {};
 
-  Accounts.registerLoginHandler(function(options) {
-    var key = options.tequilaKey;
-    if (! key) return undefined;
-    debug("tequila.authenticate with key=" + key);
-    try {
-      function fetchattributes(cb) {
-        return protocol.fetchattributes(key, cb);
+  var self; self = {
+    _getRequestKey: function(req) {
+      if (req.query && req.query.key) {
+        debug("Looks like user got redirected back from Tequila, with key=" + req.query.key);
+        return req.query.key;
       }
-      var results = Meteor.wrapAsync(fetchattributes)();
-    } catch (e) {
-      debug("fetchattributes error:", e);
-      return { error: e };
-    }
-    try {
-      var userId = getIdFromResults(results);
-      if (! userId) {
-        debug("User unknown!", results);
-        return { error: new Meteor.Error("TEQUILA_USER_UNKNOWN") };
+      debugger;
+      // TODO: also check referer
+    },
+
+    _isPrimaryRequest: function(req) {
+      return req.originalUrl === "/";  // TODO XXX
+    },
+    _validateKeyAsync: function(key, done) {
+      if (_sessionCache[key]) {
+        process.nextTick(function() {
+          debug("Session cache hit for key " + key);
+          done.apply({}, _sessionCache[key]);
+        });
+      } else {
+        debug("Session cache miss for key " + key);
+        protocol.fetchattributes(key, function(err, tequilaResults) {
+          if (err) {
+            debug("Key " + key + ": Tequila error ", err);
+            _sessionCache[key] = [err];
+          } else {
+            var userId = getIdFromResults(tequilaResults);
+            if (! userId) {
+              debug("Key " + key + ": User unknown!", tequilaResults);
+              _sessionCache[key] = [TequilaUnknownUserError(tequilaResults)];
+            } else {
+              debug("Key " + key + ": tequila.authenticate successful, user ID is " + userId);
+              _sessionCache[key] = [null, userId];
+            }
+          }
+          setTimeout(function() {
+            delete _sessionCache[key];
+          }, SESSION_CACHE_EXPIRY_MS);
+          done.apply({}, _sessionCache[key]);
+        });
       }
-      debug("tequila.authenticate successful, user ID is " + userId);
-      return { userId: userId };
-    } catch (e) {
-      return { error: e };
+    },
+    _redirectToTequilaLoginPage: function(req, res, next) {
+      protocol.createrequest(req, res, function (err, results) {
+        if (err) {
+          next(err);
+        } else {
+          debug("Redirecting user to Tequila for " + req.url);
+          protocol.requestauth(res, results);
+        }
+      })
+    },
+    _connectMiddleware: function(req, res, next) {
+      if (! self._isPrimaryRequest(req)) {
+        // It makes no sense to redirect a secondary request (e.g. CSS, JS); so
+        // we let it slide.
+        // We are not protecting any secrets in the Express middleware; the Web
+        // assets of the Meteor application are powerless, only DDP traffic
+        // provides power to the client.
+        next();
+        return;
+      }
+
+      var key = self._getRequestKey(req);
+      if (! key) {
+        self._redirectToTequilaLoginPage(req, res, next);
+      } else {
+        self._validateKeyAsync(key, function(err, tequilaResults) {
+          if (err) {
+            self._handleTequilaErrorInMiddleware(req, res, next, err);
+          } else {
+            next();
+          }
+        });
+      }
+    },
+    _handleTequilaErrorInMiddleware: function(req, res, next, err) {
+      wantsTequilaRedirect = false;
+      if (Tequila.options.onMiddlewareError) {
+        Tequila.options.onMiddlewareError.call({redirectToTequila: function() {
+          wantsTequilaRedirect = true;
+        }}, req, err);
+      }
+      if (wantsTequilaRedirect) {
+        self._redirectToTequilaLoginPage(req, res, next);
+      } else {
+        return next(err);
+      }
+    },
+    installRawConnectHandler: function(rawConnectHandlers) {
+      var connect = Npm.require('connect')();
+      connect.use(Npm.require('connect-query')());
+      connect.use(self._connectMiddleware);
+      rawConnectHandlers.use(connect);
+    },
+    meteorLoginHandler: function(options) {
+      var key = options.tequilaKey;  // Looped back to us by client
+      if (! key) return undefined;
+
+      var userId;
+      try {
+        userId = Meteor.wrapAsync(self._validateKeyAsync)(key);
+        return { userId: userId };
+      } catch (e) {
+        return { error: e };
+      }
     }
-  });
+  };
+
+  return self;
 };
 
-function getIdFromResults(results) {
-  var loggedInUser = Tequila.options.getUserId(results);
+function getIdFromResults(tequilaResults) {
+  var loggedInUser = Tequila.options.getUserId(tequilaResults);
   if (! loggedInUser) {
     return undefined;
   }
@@ -120,7 +182,7 @@ function setupFakeLocalServer(configForFake, protocol) {
     protocol.agent = new https.Agent({ca: fakes.getCACert()});
   } else if (configForFake === true) {
     // TODO: This doesn't actually work, because the devDependencies of
-    // FakeTequilaServer are not available.
+    // FakeTequilaServer may not be available.
     var fakeTequilaServer = Tequila.fakeLocalServer =
       new FakeTequilaServer();
     Meteor.wrapAsync(fakeTequilaServer.start)();
@@ -141,4 +203,10 @@ function getIpOfInterface(iface) {
   if (addressStruct) {
     return addressStruct.address;
   }
+}
+
+function TequilaUnknownUserError(tequilaResults) {
+  var error = new Meteor.Error("TEQUILA_USER_UNKNOWN");
+  _.extend(error, tequilaResults);
+  return error;
 }
