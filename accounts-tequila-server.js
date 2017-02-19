@@ -1,10 +1,9 @@
 /*
  * Authenticate against EPFL's Tequila system
  */
-var os = require("os"),
-  Protocol = require("passport-tequila/lib/passport-tequila/protocol.js"),
-  debug = require("debug")("accounts-tequila"),
-  Future = require('fibers/future');
+var os = Npm.require("os"),
+  Protocol = Npm.require("passport-tequila/lib/passport-tequila/protocol.js"),
+  debug = Npm.require("debug")("accounts-tequila");
 
 const SESSION_CACHE_EXPIRY_MS = 30 * 1000;
 
@@ -33,37 +32,42 @@ function TequilaServer() {
   var self; self = {
     _getRequestKey: function(req) {
       if (req.query && req.query.key) {
-        debug("Looks like user got redirected back from Tequila, with key=" + req.query.key);
+        debug("Looks like user got redirected back from Tequila, with key=%s", req.query.key);
         return req.query.key;
       }
-      debugger;
-      // TODO: also check referer
     },
-
-    _isPrimaryRequest: function(req) {
-      return req.originalUrl === "/";  // TODO XXX
+    /**
+     * Whether this url is powerless (non-secret, no side-effects on server)
+     *
+     * @param url A URL in the server's URL space
+     * @returns {boolean}
+     * @private
+     */
+    _urlIsPowerless: function(url) {
+      var pathname = Npm.require('url').parse(url).pathname;
+      // Special cases gleaned by reading meteor/packages/webapp/webapp_server.js
+      if (pathname === "/favicon.ico" || pathname === "/robots.txt" ||
+          pathname === "/app.manifest") {
+        return true;
+      } else if (WebAppInternals.staticFiles[pathname]) {
+        return true;
+      }
     },
     _validateKeyAsync: function(key, done) {
       if (_sessionCache[key]) {
         process.nextTick(function() {
-          debug("Session cache hit for key " + key);
+          debug("Key %s: Session cache hit with %j", key, _sessionCache[key]);
           done.apply({}, _sessionCache[key]);
         });
       } else {
-        debug("Session cache miss for key " + key);
+        debug("Key %s: Session cache miss", key);
         protocol.fetchattributes(key, function(err, tequilaResults) {
           if (err) {
-            debug("Key " + key + ": Tequila error ", err);
+            debug("Key %s: Tequila fetchattributes error %j", key, err);
             _sessionCache[key] = [err];
           } else {
-            var userId = getIdFromResults(tequilaResults);
-            if (! userId) {
-              debug("Key " + key + ": User unknown!", tequilaResults);
-              _sessionCache[key] = [TequilaUnknownUserError(tequilaResults)];
-            } else {
-              debug("Key " + key + ": tequila.authenticate successful, user ID is " + userId);
-              _sessionCache[key] = [null, userId];
-            }
+            debug("Key %s: Tequila fetchattributes success → %j", key, tequilaResults);
+            _sessionCache[key] = [null, tequilaResults];
           }
           setTimeout(function() {
             delete _sessionCache[key];
@@ -77,18 +81,15 @@ function TequilaServer() {
         if (err) {
           next(err);
         } else {
-          debug("Redirecting user to Tequila for " + req.url);
+          debug("Redirecting user to Tequila for %s", req.url);
           protocol.requestauth(res, results);
         }
       })
     },
     _connectMiddleware: function(req, res, next) {
-      if (! self._isPrimaryRequest(req)) {
-        // It makes no sense to redirect a secondary request (e.g. CSS, JS); so
-        // we let it slide.
-        // We are not protecting any secrets in the Express middleware; the Web
-        // assets of the Meteor application are powerless, only DDP traffic
-        // provides power to the client.
+      if (self._urlIsPowerless(req.url)) {
+        // It makes no sense to insist on Tequila protection for the app's JS or CSS payload etc;
+        // let this slide.
         next();
         return;
       }
@@ -129,12 +130,20 @@ function TequilaServer() {
       var key = options.tequilaKey;  // Looped back to us by client
       if (! key) return undefined;
 
-      var userId;
+      var tequilaResults;
       try {
-        userId = Meteor.wrapAsync(self._validateKeyAsync)(key);
-        return { userId: userId };
-      } catch (e) {
-        return { error: e };
+        tequilaResults = Meteor.wrapAsync(self._validateKeyAsync)(key);
+        var userId = getIdFromResults(tequilaResults);
+        if (! userId) {
+          debug("Key %s: user unknown! (%j)", key, tequilaResults);
+          return { error: TequilaUnknownUserError(tequilaResults) };
+        } else {
+          debug("Key %s: tequila.authenticate successful, user ID is %s", key, userId);
+          return { userId: userId };
+        }
+      } catch (err) {
+        debug("Key %s: meteorLoginHandler threw with %j", key, err);
+        return { error: err };
       }
     }
   };
