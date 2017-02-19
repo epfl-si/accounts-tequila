@@ -7,14 +7,11 @@ Package.describe({
 });
 
 Package.onUse(function(api) {
-  api.versionsFrom('METEOR@1.2.1');
-  api.use('ecmascript');
-  api.use('ejson');
   api.use('accounts-base');
   api.use('underscore');
-  api.use('webapp');
-  api.use('reactive-var');
-  api.use('jquery-history@1.0.2');
+  api.use('webapp', 'server');
+  api.use('reactive-var', 'client');
+  api.use('jquery-history');
   api.addFiles('accounts-tequila-common.js');
   api.addFiles('accounts-tequila-client.js', ['client']);
   api.addFiles('accounts-tequila-server.js', ['server']);
@@ -28,8 +25,9 @@ Package.onTest(function(api) {
 });
 
 Npm.depends({
-  "connect": "3.4.1",
+  "connect": "3.6.0",
   "connect-query": "0.2.0",
-  "debug": "2.2.0",
-  "passport-tequila": "0.1.10"
+  "url": "0.11.0",
+  "debug": "2.6.1",
+  "passport-tequila": "0.1.12"
 });
