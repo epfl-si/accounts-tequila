@@ -7,11 +7,12 @@ Package.describe({
 });
 
 Package.onUse(function(api) {
+  api.versionsFrom('METEOR@1.3');
   api.use('accounts-base');
   api.use('underscore');
   api.use('webapp', 'server');
   api.use('reactive-var', 'client');
-  api.use('jquery-history');
+  api.use('tmeasday:html5-history-api@4.1.2');
   api.addFiles('accounts-tequila-common.js');
   api.addFiles('accounts-tequila-client.js', ['client']);
   api.addFiles('accounts-tequila-server.js', ['server']);
