@@ -31,17 +31,17 @@ Tequila.start = function startClient() {
                                    // the Tequila key is always last
       });
   if (tequilaKey) {
-    window.History.replaceState({}, window.title, locationWithoutTequilaKey);
+    window.history.replaceState({}, window.title, locationWithoutTequilaKey);
     Accounts.callLoginMethod({
       methodArguments: [{tequilaKey: tequilaKey}],
       userCallback: function(result) {
         if (result instanceof Error) {
           if (Tequila.options.onClientError) {
             Tequila.options.onClientError(result);
-          } else if (error instanceof Meteor.Error) {
-            alert(error.message);
+          } else if (result instanceof Meteor.Error) {
+            alert(result.message);
           } else {
-            alert(error);
+            alert(result);
           }
         }
       }

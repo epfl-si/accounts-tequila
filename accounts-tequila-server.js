@@ -49,7 +49,7 @@ function TequilaServer() {
       if (pathname === "/favicon.ico" || pathname === "/robots.txt" ||
           pathname === "/app.manifest") {
         return true;
-      } else if (WebAppInternals.staticFiles[pathname]) {
+      } else if (pathname.endsWith('.svg') || pathname.endsWith('.css') || pathname.endsWith('.js') || pathname.endsWith('.map')) {
         return true;
       }
     },

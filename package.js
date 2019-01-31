@@ -12,7 +12,8 @@ Package.onUse(function(api) {
   api.use('underscore');
   api.use('webapp', 'server');
   api.use('reactive-var', 'client');
-  api.use('tmeasday:html5-history-api@4.1.2');
+  // TODO: find another package to replace 'tmeasday:html5-history-api@4.1.2'
+  //api.use('tmeasday:html5-history-api@4.1.2');
   api.addFiles('accounts-tequila-common.js');
   api.addFiles('accounts-tequila-client.js', ['client']);
   api.addFiles('accounts-tequila-server.js', ['server']);
