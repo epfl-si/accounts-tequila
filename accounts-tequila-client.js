@@ -1,25 +1,20 @@
-/**
- * Authenticate against EPFL's Tequila system
- *
- * Authentication is best left to servers; here we just remove the
- * ?key= in the URL query fragment added by Tequila upon redirecting
- * back, and pass it to Meteor's Accounts.callLoginMethod().
- */
+import { ReactiveVar } from 'meteor/reactive-var'
 
-var tequilaInfo = new ReactiveVar();
-/**
- * Reactively obtain the current Tequila state
- *
- * @locus Client
- */
-Tequila.get = _.bind(tequilaInfo.get, tequilaInfo);
+var tequilaInfo = new ReactiveVar()
 
-/**
- * Start Tequila authentication
- *
- * Called automatically unless `Tequila.options.autoStart` is false.
- */
-Tequila.start = function startClient() {
+export function get () {
+  return tequilaInfo.get()
+}
+
+function __(/* args */) {
+  if (Package['tap-i18n']) {
+    return TAPi18n.__.apply(TAPi18n, arguments);
+  } else {
+    return arguments[0];
+  }
+};
+
+export function start () {
   var queryString = window.location.search;
   if (! queryString) return;
   var tequilaKey;
@@ -48,3 +43,10 @@ Tequila.start = function startClient() {
     });
   }
 };
+
+Accounts.onLoginFailure(function() {
+  // We sent a Tequila key to the server and it told us that it was bad.
+  // Confused we are. Reload the entire app.
+  window.alert(__("Tequila login failure"))
+  window.location.href = "/"
+});

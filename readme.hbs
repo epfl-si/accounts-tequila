@@ -2,6 +2,25 @@ Control access to a Meteor Web app using EPFL's Tequila authentication system
 
 Like the [passport-tequila npm](https://www.npmjs.com/package/passport-tequila), but for Meteor
 
+# Usage
+
+```
+$ meteor add epfl:accounts-tequila
+```
+
+Then in `main.js`:
+
+```
+import Tequila from 'meteor/epfl:accounts-tequila'
+
+Meteor.startup(function() {
+  Tequila.start({
+        upsert: false,
+        fakeLocalServer: { host: "localhost", port: 3011 }
+  })
+})
+```
+
 # API Reference
 
 {{>main}}
