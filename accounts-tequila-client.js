@@ -1,8 +1,26 @@
+/**
+ * Authenticate against EPFL's Tequila system
+ *
+ * Authentication is best left to servers; here we just
+ *
+ * + remove the `?key=` in the URL query fragment added by Tequila upon
+ *   redirecting back;
+ * + send the key through the `Accounts.callLoginMethod` method
+ *
+ * @see https://github.com/meteor/meteor/search?utf8=✓&q=Accounts.callLoginMethod
+ *
+ */
+
+import { Accounts } from 'meteor/accounts-base'
 import { ReactiveVar } from 'meteor/reactive-var'
 
+export default {
+  get,
+  start
+}
 var tequilaInfo = new ReactiveVar()
 
-export function get () {
+function get () {
   return tequilaInfo.get()
 }
 
@@ -14,7 +32,8 @@ function __(/* args */) {
   }
 };
 
-export function start () {
+// Documented in accounts-tequila-server.js
+function start () {
   var queryString = window.location.search;
   if (! queryString) return;
   var tequilaKey;
@@ -28,25 +47,14 @@ export function start () {
   if (tequilaKey) {
     window.history.replaceState({}, window.title, locationWithoutTequilaKey);
     Accounts.callLoginMethod({
-      methodArguments: [{tequilaKey: tequilaKey}],
-      userCallback: function(result) {
-        if (result instanceof Error) {
-          if (Tequila.options.onClientError) {
-            Tequila.options.onClientError(result);
-          } else if (result instanceof Meteor.Error) {
-            alert(result.message);
-          } else {
-            alert(result);
-          }
-        }
-      }
+      methodArguments: [{tequilaKey: tequilaKey}]
     });
   }
 };
 
-Accounts.onLoginFailure(function() {
+Accounts.onLoginFailure(function(error) {
   // We sent a Tequila key to the server and it told us that it was bad.
   // Confused we are. Reload the entire app.
-  window.alert(__("Tequila login failure"))
+  window.alert(__("Tequila login failure: " + error.error.message))
   window.location.href = "/"
 });

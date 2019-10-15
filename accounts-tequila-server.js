@@ -85,19 +85,29 @@ export const defaultOptions = Object.freeze({
  *                                  a Promise of same.
  */
 export function start (opts) {
-  let options = _.extend({}, defaultOptions, opts)
+  let startOptions = _.extend({}, defaultOptions, opts)
 
   const protocol = new Protocol()
-  _.extend(protocol, options)
-  if (options.fakeLocalServer) {
-    setupFakeLocalServer(options.fakeLocalServer, protocol).catch(console.error)
+  _.extend(protocol, startOptions)
+  if (startOptions.fakeLocalServer) {
+    setupFakeLocalServer(startOptions.fakeLocalServer, protocol).catch(console.error)
   }
+
+  function maybeAddWildcard(url) {
+    if (url.endsWith('/')) {
+      return url + '**'
+    } else {
+      return url
+    }
+  }
+  const bypass = startOptions.bypass.map(maybeAddWildcard),
+      control = startOptions.control.map(maybeAddWildcard)
 
   const connect = connect_()
   connect.use(connectQuery())
   connect.use(function(req, res, next) {
-    if ((! micromatch.isMatch(req.url, options.bypass)) &&
-        micromatch.isMatch(req.url, options.control)) {
+    if ((! micromatch.isMatch(req.url, startOptions.bypass)) &&
+        micromatch.isMatch(req.url, startOptions.control)) {
       tequilaRedirectHTTP(req, res, next, protocol)
     } else {
       next()
@@ -105,56 +115,54 @@ export function start (opts) {
   })
   WebApp.connectHandlers.use(connect)
 
-  Accounts.registerLoginHandler(async function(options) {
+  // Meteor login handlers (still) cannot be async functions:
+  Accounts.registerLoginHandler((options) => Promise.await(tequilaLogin(options)))
+
+  async function tequilaLogin (options) {
     const key = options.tequilaKey
-    if (! key) return undefined
+    if (! key) {
+      return { error: new Meteor.Error("Tequila:no-tequilaKey-received") }
+    }
+
     debug("tequila.authenticate with key=" + key)
+
+    // We expect this to succeed no matter what - Given that Tequila
+    // redirected the user and provided a key, we expect the key to be
+    // valid.
+    const tequilaAttributes = await promisify(protocol, protocol.fetchattributes)(key)
     try {
-      function fetchattributes(cb) {
-        return protocol.fetchattributes(key, cb)
-      }
-      const results = Meteor.wrapAsync(fetchattributes)()
-    } catch (e) {
-      debug("fetchattributes error:", e)
-      return { error: e }
-    }
-    try {
-      const userId = await getIdFromResults(results)
-      if (! userId) {
-        debug("User unknown!", results)
-        return { error: new Meteor.Error("Tequila:user-unknown") }
-      }
+      const userId = extractUserId(await startOptions.getUserId(tequilaAttributes))
       debug("tequila.authenticate successful, user ID is " + userId)
-      return { userId: userId }
-    } catch (e) {
-      return { error: e }
+      return { userId }
+    } catch (error) {
+      // On the other hand, extractUserId may throw for “business”
+      // reasons (e.g. "Tequila:user-unknown"), so we forward the
+      // exception to the client side.
+      return { error }
     }
-  })
+  }
 }
 
-async function getIdFromResults(results) {
-  return new Promise(function(resolve, reject) {
-    (async function() {
-      const loggedInUser = await options.getUserId(results)
-
-      if (! loggedInUser) {
-        return undefined
+/**
+ * @param Object user Whatever `startOptions.getUserId()` returns
+ * @private
+ */
+function extractUserId (user) {
+  if (! user) {
+    throw new Meteor.Error("Tequila:user-unknown")
+  } else if (user.forEach) { // Cursor
+    user.forEach(function (error, value) {
+      if (error) {
+        throw error
+      } else {
+        return value
       }
-
-      if (loggedInUser.forEach) { // Cursor
-        loggedInUser.forEach(function (error, value) {
-          if (error) {
-            throw error
-          } else {
-            return value
-          }
-        })
-    } else if (loggedInUser._id) {
-      return loggedInUser._id
-    } else {
-      return loggedInUser
-    }
-  })().then(resolve).catch(reject)})
+    })
+  } else if (user._id) {
+    return '' + user._id
+  } else {
+    return user
+  }
 }
 
 async function setupFakeLocalServer(configForFake, protocol) {
