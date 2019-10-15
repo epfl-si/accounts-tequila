@@ -46,7 +46,8 @@ export const fakeTequilaServer = () => fakeTequilaServer_
 
 export const defaultOptions = Object.freeze({
     client: "meteor-accounts-tequila",
-    getUserId: (tequilaResponse) => Meteor.users.findOne({username: tequilaResponse.name}),
+    getUserId: (tequila) => tequila.uniqueid || tequila.user,
+    upsert: (tequila) => ({ $set: { tequila: filterPersistentAttributes(tequila) }}),
     bypass: ["/packages/", "/lib/", "/node_modules/", "/tap-i18n/", "/favicon.ico"],
     control: ["/"]
   })
@@ -82,7 +83,31 @@ export const defaultOptions = Object.freeze({
  *                                  RPC response fields, and returns either the Meteor
  *                                  user ID to be used (which must be a string - See
  *                                  https://stackoverflow.com/a/24972966/435004) or
- *                                  a Promise of same.
+ *                                  a Promise of same. Also, If opts.upsert is not
+ *                                  `false`, non-existent users will be auto-created
+ *                                  with the return value as their Meteor user ID;
+ *                                  see opts.upsert for details. The default behavior
+ *                                  is to return either `tequilaAttributes.uniqueid`
+ *                                  if it exists, or `tequilaAttributes.user`
+ *                                  otherwise.
+ * @param {function(tequilaAttributes)} opts.upsert
+ *                                  Function that takes the Tequila `fetchattributes`
+ *                                  RPC response fields, and returns either the things
+ *                                  that should be upserted in this user's `Meteor.user`
+ *                                  record (the one whose ID is the return value of
+ *                                  opts.getUserId) or a Promise for same. The default
+ *                                  implementation returns
+ *                                  `{ $set: { tequila: tequilaAttributes }}`.
+ *                                  Set opts.upsert to `false` if you don't want
+ *                                  accounts-tequila to perform automatic upsertion
+ *                                  for you (in which case you may program
+ *                                  `opts.getUserId` to auto-create users before
+ *                                  completing its Promise). If neither your code
+ *                                  (in `opts.getUserId`) nor accounts-tequila (with
+ *                                  `opts.upsert`) auto-creates users, then users
+ *                                  without a pre-existent entry in the Meteor.user
+ *                                  collection get a `Tequila:user-unknown` exception
+ *                                  to their `login` method call.
  */
 export function start (opts) {
   let startOptions = _.extend({}, defaultOptions, opts)
@@ -130,38 +155,34 @@ export function start (opts) {
     // redirected the user and provided a key, we expect the key to be
     // valid.
     const tequilaAttributes = await promisify(protocol, protocol.fetchattributes)(key)
-    try {
-      const userId = extractUserId(await startOptions.getUserId(tequilaAttributes))
+    const userId = await startOptions.getUserId(tequilaAttributes)
+    if (! userId) {
+      return { error: new Meteor.Error("Tequila:user-unknown") }
+    } else if (typeof(userId) != 'string') {
+      throw new Error("Your Meteor.user scheme must use strings as _id's; see https://stackoverflow.com/a/24972966/435004")
+    } else {
       debug("tequila.authenticate successful, user ID is " + userId)
-      return { userId }
-    } catch (error) {
-      // On the other hand, extractUserId may throw for “business”
-      // reasons (e.g. "Tequila:user-unknown"), so we forward the
-      // exception to the client side.
-      return { error }
     }
-  }
-}
 
-/**
- * @param Object user Whatever `startOptions.getUserId()` returns
- * @private
- */
-function extractUserId (user) {
-  if (! user) {
-    throw new Meteor.Error("Tequila:user-unknown")
-  } else if (user.forEach) { // Cursor
-    user.forEach(function (error, value) {
-      if (error) {
-        throw error
-      } else {
-        return value
+    if (startOptions.upsert) {
+      upsertUser(userId, await startOptions.upsert(tequilaAttributes))
+    } else {
+      // Give a client-side clue to nonexistent users.
+      // If we return a nonexistent user ID here, Meteor will accept
+      // it and attempt to persist a newly-minted session token (which
+      // will be a MongoDB update with 0 objects changed, since the
+      // user ID doesn't exist). The Meteor server will then send the
+      // session token to the client, which immediately uses it to
+      // effect a session restore method call (as a precaution against
+      // precisely this kind of bugs). Obviously the session will be
+      // unknown server-side, resulting in an absconse and abrubt
+      // session termination client-side.
+      if (! Meteor.users.findOne({_id: userId})) {
+        return { error: new Meteor.Error("Tequila:user-unknown") }
       }
-    })
-  } else if (user._id) {
-    return '' + user._id
-  } else {
-    return user
+    }
+
+    return { userId }
   }
 }
 
@@ -210,6 +231,45 @@ Try
 
   meteor npm i --save-dev ${requirements.join(" ")}`
   )
+}
+
+/**
+ * Upsert (update or insert) a record in Meteor.users
+ *
+ * Newly created users must have an _id that is a string (see
+ * https://stackoverflow.com/a/24972966/435004). We use either
+ * `tequila.uniqueid` (i.e. the person's SCIPER number) or
+ * `tequila.user` (i.e. the person's GASPAR user name), in this order
+ * of preference, depending on which is defined.
+ *
+ * @param {string} id The Meteor.user ID to upsert as - Must be a
+ *                  string as per
+ *                  https://stackoverflow.com/a/24972966/435004
+ *
+ * @param {Object} setAttributes A standard MongoDB upsert payload, e.g.
+ *                 { $set: { foo: "bar" }}
+ *
+ * @return Promise Resolves to the Meteor.user record when upsertion completes
+ */
+function upsertUser(id, setAttributes) {
+  // https://stackoverflow.com/a/16362833/435004
+  const c = Meteor.users.rawCollection()
+  return promisify(c, c.findAndModify)(
+    // https://stackoverflow.com/a/22672586/435004
+    { _id: id },
+    [],   // sort
+    setAttributes,
+    { new: true, upsert: true }
+  )
+}
+
+function filterPersistentAttributes (a) {
+  a = {...a}  // Shallow copy
+  for (let volatileAttribute of ["status", "host", "key", "requestkey", "requesthost",
+                                 "version", "authorig", "authstrength"]) {
+    delete a[volatileAttribute]
+  }
+  return a
 }
 
 function promisify(opt_that, f) {
