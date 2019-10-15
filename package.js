@@ -15,7 +15,6 @@ Package.onUse((api) => {
   api.use('accounts-base')
   api.use('underscore')
   api.use('webapp')
-  api.use('reactive-var')
   api.use('tomwasd:history-polyfill@0.0.1')
   api.use('tap:i18n@1.0.0 || 0.0.0', {weak: true})
   api.mainModule('accounts-tequila-client.js', 'client')

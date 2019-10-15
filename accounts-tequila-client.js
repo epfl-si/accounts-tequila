@@ -12,16 +12,9 @@
  */
 
 import { Accounts } from 'meteor/accounts-base'
-import { ReactiveVar } from 'meteor/reactive-var'
 
 export default {
-  get,
   start
-}
-var tequilaInfo = new ReactiveVar()
-
-function get () {
-  return tequilaInfo.get()
 }
 
 function __(/* args */) {
