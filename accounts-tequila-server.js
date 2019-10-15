@@ -39,7 +39,17 @@ function tequilaRedirectHTTP(req, res, next, protocol) {
   }
 }
 
-export let fakeTequilaServer
+let fakeTequilaServer_
+
+export const fakeTequilaServer = () => fakeTequilaServer_
+
+export const defaultOptions = Object.freeze({
+    client: "meteor-accounts-tequila",
+    getUserId: (tequilaResponse) => Meteor.users.findOne({username: tequilaResponse.name}),
+    bypass: ["/merged-stylesheets.css", "/packages/", "/lib/", "/node_modules/",
+             "/tap-i18n/", "/error-stack-parser.min.js.map", "/favicon.ico"],
+    control: ["/"]
+  })
 
 /**
  * Enable Tequila with a redirect-based flow.
@@ -75,13 +85,8 @@ export let fakeTequilaServer
  *                                  a Promise of same.
  */
 export function start (opts) {
-  let options = _.extend({
-    client: "meteor-accounts-tequila",
-    getUserId: (tequilaResponse) => Meteor.users.findOne({username: tequilaResponse.name}),
-    bypass: ["/merged-stylesheets.css", "/packages/", "/lib/", "/node_modules/",
-             "/tap-i18n/", "/error-stack-parser.min.js.map", "/favicon.ico"],
-    control: ["/"]
-  }, opts)
+  let options = _.extend({}, defaultOptions, opts)
+
   const protocol = new Protocol()
   _.extend(protocol, options)
   if (options.fakeLocalServer) {
@@ -175,14 +180,14 @@ async function setupFakeLocalServer(configForFake, protocol) {
     protocol.agent = new https.Agent({ca: fakes.getCACert()})
   } else if (configForFake === true) {
     try {
-      fakeTequilaServer = new fakes.TequilaServer()
-      await promisify(fakeTequilaServer, fakeTequilaServer_.start)()
+      fakeTequilaServer_ = new fakes.TequilaServer()
+      await promisify(fakeTequilaServer_, fakeTequilaServer_.start)()
     } catch (e) {
       throw diagnoseDependencies(e)
     }
     console.log("Fake Tequila server listening at " +
-      "https://localhost:" + fakeTequilaServer.port + "/")
-    _.extend(protocol, fakeTequilaServer.getOptions())
+      "https://localhost:" + fakeTequilaServer_.port + "/")
+    _.extend(protocol, fakeTequilaServer_.getOptions())
   } else {
     throw new Error("setupFakeLocalServer: " +
       "unable to determine what to do for config " + configForFake)

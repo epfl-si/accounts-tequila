@@ -16,7 +16,7 @@ import Tequila from 'meteor/epfl:accounts-tequila'
 Meteor.startup(function() {
   Tequila.start({
         upsert: false,
-        fakeLocalServer: { host: "localhost", port: 3011 }
+        ...
   })
 })
 ```
