@@ -16,10 +16,23 @@ import Tequila from 'meteor/epfl:accounts-tequila'
 Meteor.startup(function() {
   Tequila.start({
         upsert: false,
-        fakeLocalServer: { host: "localhost", port: 3011 }
+        ...
   })
 })
 ```
+
+# Fake Tequila server
+
+This package is attuned to
+[passport-tequila](https://www.npmjs.com/package/passport-tequila)'s
+fake Tequila server. To use it:
+
+1. Run the following command in your Meteor project: <pre>meteor npm i --save-dev express pem ip fqdn</pre>
+1. Pass <pre>Tequila.start({..., fakeTequilaServer: true })</pre><b>OR
+1. Do this outside of your Meteor project: <pre>git clone git@gitlab.com:epfl-sti/passport-tequila.git
+
+</pre>
+1. Pass <pre>Tequila.start({..., fakeTequilaServer: { port: 3011 } })</pre>
 
 # API Reference
 
@@ -47,5 +60,6 @@ this way, so that the app may initialize as normal).
 | opts.tequila_port | <code>string</code> | Passed to `passport-tequila`'s `Protocol` object |
 | opts.bypass | <code>Array.&lt;string&gt;</code> | List of URL patterns that are *not* redirected                                  to Tequila |
 | opts.control | <code>Array.&lt;string&gt;</code> | List of URL patterns that are redirected to                                  Tequila, subject to the exceptions stated above                                  (i.e. not matching `opts.bypass`, and not when a                                  ?key= URL parameter is present) |
+| opts.fakeTequilaServer | <code>boolean</code> \| <code>Object</code> | Either `{ port: portNumber }` to                                  use a Tequila server already running out-of-process,                                  or `true` for an in-process Tequila                                  server on an ephemeral port |
 | opts.getUserId | <code>function</code> | Function that takes the Tequila `fetchattributes`                                  RPC response fields, and returns either the Meteor                                  user ID to be used (which must be a string - See                                  https://stackoverflow.com/a/24972966/435004) or                                  a Promise of same. |
 

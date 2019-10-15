@@ -1,3 +1,4 @@
+import https from 'https'
 import { Meteor } from 'meteor/meteor'
 import { WebApp } from 'meteor/webapp'
 import { Promise } from 'meteor/promise'
@@ -38,6 +39,8 @@ function tequilaRedirectHTTP(req, res, next, protocol) {
   }
 }
 
+export let fakeTequilaServer
+
 /**
  * Enable Tequila with a redirect-based flow.
  *
@@ -60,6 +63,10 @@ function tequilaRedirectHTTP(req, res, next, protocol) {
  *                                  Tequila, subject to the exceptions stated above
  *                                  (i.e. not matching `opts.bypass`, and not when a
  *                                  ?key= URL parameter is present)
+ * @param {boolean|Object} opts.fakeTequilaServer Either `{ port: portNumber }` to
+ *                                  use a Tequila server already running out-of-process,
+ *                                  or `true` for an in-process Tequila
+ *                                  server on an ephemeral port
  * @param {function(tequilaAttributes)} opts.getUserId
  *                                  Function that takes the Tequila `fetchattributes`
  *                                  RPC response fields, and returns either the Meteor
@@ -78,7 +85,7 @@ export function start (opts) {
   const protocol = new Protocol()
   _.extend(protocol, options)
   if (options.fakeLocalServer) {
-    setupFakeLocalServer(options.fakeLocalServer, protocol)
+    setupFakeLocalServer(options.fakeLocalServer, protocol).catch(console.error)
   }
 
   const connect = connect_()
@@ -152,25 +159,29 @@ async function getIdFromResults(results) {
   })().then(resolve).catch(reject)})
 }
 
-function setupFakeLocalServer(configForFake, protocol) {
-  const fakes = import("passport-tequila/test/fakes.js"),
-    FakeTequilaServer = fakes.TequilaServer
-  if ("port" in configForFake) {
-    const https = import("https"),
-          port = configForFake.port
+async function setupFakeLocalServer(configForFake, protocol) {
+  let fakes
+  try {
+      fakes = require("passport-tequila/test/fakes.js")
+  } catch (e) {
+    throw diagnoseDependencies(e)
+  }
+  const port = configForFake.port
+  if (port) {
     console.log("Using fake Tequila server already running at port "
       + port)
     protocol.tequila_host = "localhost"
     protocol.tequila_port = port
     protocol.agent = new https.Agent({ca: fakes.getCACert()})
   } else if (configForFake === true) {
-    // TODO: This doesn't actually work, because the devDependencies of
-    // FakeTequilaServer are not available.
-    const fakeTequilaServer = Tequila.fakeLocalServer =
-      new FakeTequilaServer()
-    Meteor.wrapAsync(fakeTequilaServer.start)()
+    try {
+      fakeTequilaServer = new fakes.TequilaServer()
+      await promisify(fakeTequilaServer, fakeTequilaServer_.start)()
+    } catch (e) {
+      throw diagnoseDependencies(e)
+    }
     console.log("Fake Tequila server listening at " +
-      "https://localhost:" + Tequila.fakeTequilaServer.port + "/")
+      "https://localhost:" + fakeTequilaServer.port + "/")
     _.extend(protocol, fakeTequilaServer.getOptions())
   } else {
     throw new Error("setupFakeLocalServer: " +
@@ -178,18 +189,38 @@ function setupFakeLocalServer(configForFake, protocol) {
   }
 }
 
-function getIpOfInterface(iface) {
-  var ifaceDef =  os.networkInterfaces()[iface];
-  var addressStruct = _.find(ifaceDef || [], function (addressStruct) {
-    return addressStruct.family === "IPv4";
-  });
-  if (addressStruct) {
-    return addressStruct.address;
+async function diagnoseDependencies (e) {
+  if (e.code !== 'MODULE_NOT_FOUND') {
+    return e
   }
+
+  console.error(e)
+
+  const requirements = ["express", "pem", "ip", "fqdn"]
+  return new Meteor.Error(
+      'accounts-tequila-server:devDependencies',
+     `In order to use the fake Tequila server, you need to install its<er dependencies.
+Try
+
+  meteor npm i --save-dev ${requirements.join(" ")}`
+  )
 }
 
-function TequilaUnknownUserError(tequilaResults) {
-  var error = new Meteor.Error("TEQUILA_USER_UNKNOWN");
-  _.extend(error, tequilaResults);
-  return error;
+function promisify(opt_that, f) {
+  if (! f) {
+    f = opt_that
+    opt_that = {}
+  }
+  return function(/* args */) {
+    const args = Array.prototype.slice.call(arguments)
+    return new Promise(function(resolve, reject) {
+      f.apply(opt_that, args.concat([function(error, result) {
+        if (error) {
+          reject(error)
+        } else {
+          resolve(result)
+        }
+      }]))
+    })
+  }
 }
