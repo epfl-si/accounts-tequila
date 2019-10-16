@@ -46,8 +46,7 @@ export const fakeTequilaServer = () => fakeTequilaServer_
 export const defaultOptions = Object.freeze({
     client: "meteor-accounts-tequila",
     getUserId: (tequilaResponse) => Meteor.users.findOne({username: tequilaResponse.name}),
-    bypass: ["/merged-stylesheets.css", "/packages/", "/lib/", "/node_modules/",
-             "/tap-i18n/", "/error-stack-parser.min.js.map", "/favicon.ico"],
+    bypass: ["/packages/", "/lib/", "/node_modules/", "/tap-i18n/", "/favicon.ico"],
     control: ["/"]
   })
 
@@ -110,7 +109,7 @@ export function start (opts) {
       }
     })
   })
-  WebApp.rawConnectHandlers.use(connect)
+  WebApp.connectHandlers.use(connect)
 
   Accounts.registerLoginHandler(async function(options) {
     const key = options.tequilaKey
