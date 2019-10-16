@@ -6,6 +6,7 @@ import { _ } from 'meteor/underscore'
 
 import connect_ from 'connect'
 import connectQuery from 'connect-query'
+import micromatch from 'micromatch'
 
 import Protocol from 'passport-tequila/lib/passport-tequila/protocol.js'
 
@@ -94,20 +95,13 @@ export function start (opts) {
 
   const connect = connect_()
   connect.use(connectQuery())
-  _.each(options.bypass, function (url) {
-    connect.use(url, function (req, res, next) {
-      req.tequila = {whitelisted: true}
+  connect.use(function(req, res, next) {
+    if ((! micromatch.isMatch(req.url, options.bypass)) &&
+        micromatch.isMatch(req.url, options.control)) {
+      tequilaRedirectHTTP(req, res, next, protocol)
+    } else {
       next()
-    })
-  })
-  _.each(options.control, function (url) {
-    connect.use(url, function (req, res, next) {
-      if (req.tequila && req.tequila.whitelisted) {
-        next()
-      } else {
-        tequilaRedirectHTTP(req, res, next, protocol)
-      }
-    })
+    }
   })
   WebApp.connectHandlers.use(connect)
 
