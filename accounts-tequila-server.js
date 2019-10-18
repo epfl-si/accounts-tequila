@@ -108,6 +108,9 @@ export const defaultOptions = Object.freeze({
  *                                  without a pre-existent entry in the Meteor.user
  *                                  collection get a `Tequila:user-unknown` exception
  *                                  to their `login` method call.
+ * @param {function(error)} opts.onLoginFailure
+ *                                  (Ignored server-side) What to do on the client if
+ *                                  login fails.
  */
 export function start (opts) {
   let startOptions = _.extend({}, defaultOptions, opts)
