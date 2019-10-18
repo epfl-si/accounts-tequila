@@ -1,6 +1,6 @@
 Package.describe({
   name: 'epfl:accounts-tequila',
-  version: '0.2.0',
+  version: '0.3.0',
   summary: 'Log in to Web apps using EPFL\'s [Tequila](http://tequila.epfl.ch/)',
   git: 'https://github.com/epfl-sti/accounts-tequila',
   documentation: 'README.md'
