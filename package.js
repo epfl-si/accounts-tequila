@@ -26,4 +26,4 @@ Npm.depends({
   "connect-query": "1.0.0",
   "debug": "4.1.1",
   "passport-tequila": "0.1.15"
-});
+})
