@@ -141,49 +141,46 @@ export function start (opts) {
   WebApp.connectHandlers.use(connect)
 
   // Meteor login handlers (still) cannot be async functions:
-  Accounts.registerLoginHandler((options) => Promise.await(tequilaLogin(options)))
+  Accounts.registerLoginHandler((params) => Promise.await(tequilaLogin(
+    startOptions, protocol, params.tequilaKey)))
+}
 
-  async function tequilaLogin (options) {
-    const key = options.tequilaKey
-    if (! key) {
-      return { error: new Meteor.Error("Tequila:no-tequilaKey-received") }
-    }
-
-    debug("tequila.authenticate with key=" + key)
-
-    // We expect this to succeed no matter what - Given that Tequila
-    // redirected the user and provided a key, we expect the key to be
-    // valid.
-    const tequilaAttributes = await promisify(protocol, protocol.fetchattributes)(key)
-    const userId = await startOptions.getUserId(tequilaAttributes)
-    if (! userId) {
-      return { error: new Meteor.Error("Tequila:user-unknown") }
-    } else if (typeof(userId) != 'string') {
-      throw new Error("Your Meteor.user scheme must use strings as _id's; see https://stackoverflow.com/a/24972966/435004")
-    } else {
-      debug("tequila.authenticate successful, user ID is " + userId)
-    }
-
-    if (startOptions.upsert) {
-      upsertUser(userId, await startOptions.upsert(tequilaAttributes))
-    } else {
-      // Give a client-side clue to nonexistent users.
-      // If we return a nonexistent user ID here, Meteor will accept
-      // it and attempt to persist a newly-minted session token (which
-      // will be a MongoDB update with 0 objects changed, since the
-      // user ID doesn't exist). The Meteor server will then send the
-      // session token to the client, which immediately uses it to
-      // effect a session restore method call (as a precaution against
-      // precisely this kind of bugs). Obviously the session will be
-      // unknown server-side, resulting in an absconse and abrubt
-      // session termination client-side.
-      if (! Meteor.users.findOne({_id: userId})) {
-        return { error: new Meteor.Error("Tequila:user-unknown") }
-      }
-    }
-
-    return { userId }
+async function tequilaLogin (opts, protocol, key) {
+  if (! key) {
+    return { error: new Meteor.Error("Tequila:no-tequilaKey-received") }
   }
+
+  debug("tequila.authenticate with key=" + key)
+
+  const tequilaAttributes = await promisify(protocol, protocol.fetchattributes)(key)
+  const userId = await opts.getUserId(tequilaAttributes)
+  if (! userId) {
+    return { error: new Meteor.Error("Tequila:user-unknown") }
+  } else if (typeof(userId) != 'string') {
+    throw new Error("Your Meteor.user scheme must use strings as _id's; see https://stackoverflow.com/a/24972966/435004")
+  } else {
+    debug("tequila.authenticate successful, user ID is " + userId)
+  }
+
+  if (opts.upsert) {
+    upsertUser(userId, await opts.upsert(tequilaAttributes))
+  } else {
+    // Give a client-side clue to nonexistent users.
+    // If we return a nonexistent user ID here, Meteor will accept
+    // it and attempt to persist a newly-minted session token (which
+    // will be a MongoDB update with 0 objects changed, since the
+    // user ID doesn't exist). The Meteor server will then send the
+    // session token to the client, which immediately uses it to
+    // effect a session restore method call (as a precaution against
+    // precisely this kind of bugs). Obviously the session will be
+    // unknown server-side, resulting in an absconse and abrubt
+    // session termination client-side.
+    if (! Meteor.users.findOne({_id: userId})) {
+      return { error: new Meteor.Error("Tequila:user-unknown") }
+    }
+  }
+
+  return { userId }
 }
 
 async function setupFakeLocalServer(configForFake, protocol) {
