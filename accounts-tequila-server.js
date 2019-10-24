@@ -226,7 +226,7 @@ async function diagnoseDependencies (e) {
   const requirements = ["express", "pem", "ip", "fqdn"]
   return new Meteor.Error(
       'accounts-tequila-server:devDependencies',
-     `In order to use the fake Tequila server, you need to install its<er dependencies.
+     `In order to use the fake Tequila server, you need to install its dependencies.
 Try
 
   meteor npm i --save-dev ${requirements.join(" ")}`

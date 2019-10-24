@@ -36,7 +36,7 @@ function start (opts) {
       function(matched, sep1, key, sep2) {
         tequilaKey = key
         return sep2 ? sep1 : ""   // Although in practice it looks like
-                                   // the Tequila key is always last
+                                  // the Tequila key is always last
       })
   if (tequilaKey) {
     window.history.replaceState({}, window.title, locationWithoutTequilaKey)
