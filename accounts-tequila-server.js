@@ -134,8 +134,8 @@ export function start (opts) {
   const connect = connect_()
   connect.use(connectQuery())
   connect.use(function(req, res, next) {
-    if ((! micromatch.isMatch(req.url, startOptions.bypass)) &&
-        micromatch.isMatch(req.url, startOptions.control)) {
+    if ((! micromatch.isMatch(req.url, bypass)) &&
+        micromatch.isMatch(req.url, control)) {
       tequilaRedirectHTTP(req, res, next, protocol)
     } else {
       next()
