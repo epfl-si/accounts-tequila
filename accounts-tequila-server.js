@@ -17,7 +17,7 @@ const debug = debug_('accounts-tequila')
  * Authenticate against EPFL's Tequila system
  * @private
  */
-function tequilaRedirectHTTP(req, res, next, protocol) {
+function handleTequilaProtectedResource(req, res, next, protocol) {
   if (req.query && req.query.key) {
     debug("Looks like user is back from Tequila, with key=" + req.query.key)
     // Do *NOT* resolve the key with the Tequila server just yet. That key is
@@ -136,7 +136,7 @@ export function start (opts) {
   connect.use(function(req, res, next) {
     if ((! micromatch.isMatch(req.url, bypass)) &&
         micromatch.isMatch(req.url, control)) {
-      tequilaRedirectHTTP(req, res, next, protocol)
+      handleTequilaProtectedResource(req, res, next, protocol)
     } else {
       next()
     }
