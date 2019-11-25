@@ -149,9 +149,7 @@ export function start (opts) {
 }
 
 async function tequilaLogin (opts, protocol, key) {
-  if (! key) {
-    return { error: new Meteor.Error("Tequila:no-tequilaKey-received") }
-  }
+  if (! key) { return undefined }
 
   debug("tequila.authenticate with key=" + key)
 
