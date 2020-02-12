@@ -21,7 +21,7 @@ A lot of server-side rewrite that ended up reverted in version 0.3.0
 
 # Version 0.1.0
 
-- First battle-tested version in a production application, the EPFL WordPress [source of truth](https://github.com/epfl-idevelop/wp-veritas)
+- First battle-tested version in a production application, the EPFL WordPress [source of truth](https://github.com/epfl-si/wp-veritas)
 - Upgrade to Meteor version 1.3, passport-tequila version 0.1.10
 - Use [micromatch](https://www.npmjs.com/package/micromatch) to allow wildcards in the URL filters
 
