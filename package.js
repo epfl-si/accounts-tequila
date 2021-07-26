@@ -29,7 +29,7 @@ Npm.depends({
   "fqdn": "0.0.3",
   "ip": "1.1.5",
   "pem": "1.14.4",
-  "passport-tequila": "0.1.15",
+  "passport-tequila": "0.2.0",
   "request": "2.88.2",
   "micromatch": "4.0.2",
   "@types/micromatch": "3.1.0",
