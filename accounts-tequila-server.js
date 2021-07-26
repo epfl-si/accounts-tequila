@@ -195,13 +195,12 @@ async function setupFakeLocalServer(configForFake, protocol) {
   if (port) {
     console.log("Using fake Tequila server already running at port "
       + port)
-    protocol.tequila_host = "localhost"
-    protocol.tequila_port = port
-    protocol.agent = new https.Agent({ca: fakes.getCACert()})
+    setupFakeTequilaServer(protocol, "localhost", port)
   } else if (configForFake === true) {
     try {
       fakeTequilaServer_ = new fakes.TequilaServer()
       await promisify(fakeTequilaServer_, fakeTequilaServer_.start)()
+      setupFakeTequilaServer(protocol, "localhost", fakeTequilaServer.port)
     } catch (e) {
       throw diagnoseDependencies(e)
     }
@@ -212,6 +211,12 @@ async function setupFakeLocalServer(configForFake, protocol) {
     throw new Error("setupFakeLocalServer: " +
       "unable to determine what to do for config " + configForFake)
   }
+
+  function setupFakeTequilaServer(protocol, hostname, port) {
+    protocol.tequila_host = hostname
+    protocol.tequila_port = port
+    protocol.agent = new https.Agent({ca: fakes.getCACert()})
+ }
 }
 
 async function diagnoseDependencies (e) {
