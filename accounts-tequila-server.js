@@ -198,7 +198,6 @@ async function setupFakeLocalServer(configForFake, protocol) {
     setupFakeTequilaServer(protocol, "localhost", fakeTequilaServer.port)
     console.log("Fake Tequila server listening at " +
       "https://localhost:" + fakeTequilaServer_.port + "/")
-    _.extend(protocol, fakeTequilaServer_.getOptions())
   } else {
     throw new Error("setupFakeLocalServer: " +
       "unable to determine what to do for config " + configForFake)
