@@ -187,20 +187,18 @@ async function tequilaLogin (opts, protocol, key) {
 async function setupFakeLocalServer(configForFake, protocol) {
   const fakes = require("passport-tequila/test/fakes.js")
 
-  if (configForFake === true) {
-    fakeTequilaServer_ = new fakes.TequilaServer()
-    await promisify(fakeTequilaServer_, fakeTequilaServer_.start)()
-    setupFakeTequilaServer(protocol, "localhost", fakeTequilaServer.port)
-    console.log("Fake Tequila server listening at " +
-      "https://localhost:" + fakeTequilaServer_.port + "/")
-  } else if (configForFake.port) {
-    const port = configForFake.port
-    console.log("Using fake Tequila server already running at port "
-      + port)
-    setupFakeTequilaServer(protocol, "localhost", port)
-  } else {
-    throw new Error("setupFakeLocalServer: " +
-      "unable to determine what to do for config " + configForFake)
+  if (configForFake) {
+    if (configForFake.port) {
+      console.log("Using fake Tequila server already running at port "
+        + configForFake.port)
+      setupFakeTequilaServer(protocol, "localhost", configForFake.port)
+    } else {
+      const fakeTequilaServer_ = new fakes.TequilaServer(configForFake)
+      await promisify(fakeTequilaServer_, fakeTequilaServer_.start)()
+      console.log("Fake Tequila server listening at " +
+        "https://localhost:" + fakeTequilaServer_.port + "/")
+      setupFakeTequilaServer(protocol, "localhost", fakeTequilaServer.port)
+    }
   }
 
   function setupFakeTequilaServer(protocol, hostname, port) {
