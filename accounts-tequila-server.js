@@ -40,10 +40,6 @@ function handleTequilaProtectedResource(req, res, next, protocol) {
   }
 }
 
-let fakeTequilaServer_
-
-export const fakeTequilaServer = () => fakeTequilaServer_
-
 export const defaultOptions = Object.freeze({
     client: "meteor-accounts-tequila",
     getUserId: (tequila) => tequila.uniqueid || tequila.user,
@@ -194,10 +190,10 @@ async function setupFakeLocalServer(configForFake, protocol) {
       setupFakeTequilaServer(protocol, configForFake.host || "localhost",
         configForFake.port)
     } else {
-      const fakeTequilaServer_ = new fakes.TequilaServer(configForFake)
-      await promisify(fakeTequilaServer_, fakeTequilaServer_.start)()
+      const fakeTequilaServer = new fakes.TequilaServer(configForFake)
+      await promisify(fakeTequilaServer, fakeTequilaServer.start)()
       console.log("Fake Tequila server listening at " +
-        "https://localhost:" + fakeTequilaServer_.port + "/")
+        "https://localhost:" + fakeTequilaServer.port + "/")
       setupFakeTequilaServer(protocol, "localhost", fakeTequilaServer.port)
     }
   }
