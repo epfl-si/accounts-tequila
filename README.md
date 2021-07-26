@@ -28,7 +28,7 @@ This package is attuned to
 fake Tequila server. To use it:
 
 1. Run the following command in your Meteor project: <pre>meteor npm i --save-dev express pem ip fqdn</pre>
-1. Pass <pre>Tequila.start({..., fakeLocalServer: true })</pre><b>OR
+1. Pass <pre>Tequila.start({..., fakeLocalServer: true })</pre><b>OR</b>
 1. Do this outside of your Meteor project: <pre>git clone git@gitlab.com:epfl-sti/passport-tequila.git
 
 </pre>
