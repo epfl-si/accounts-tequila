@@ -1,3 +1,8 @@
+# Version 0.4.0
+
+- Upgrade passport-tequila to 0.2.0
+- Refactor and document the use cases for the fake server (with or without a stand-alone configuration file)
+
 # Version 0.3.0
 
 - Upgrade to Meteor version 1.8,
