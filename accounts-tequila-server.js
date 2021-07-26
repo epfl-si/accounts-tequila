@@ -185,25 +185,17 @@ async function tequilaLogin (opts, protocol, key) {
 }
 
 async function setupFakeLocalServer(configForFake, protocol) {
-  let fakes
-  try {
-      fakes = require("passport-tequila/test/fakes.js")
-  } catch (e) {
-    throw diagnoseDependencies(e)
-  }
+  const fakes = require("passport-tequila/test/fakes.js")
+
   const port = configForFake.port
   if (port) {
     console.log("Using fake Tequila server already running at port "
       + port)
     setupFakeTequilaServer(protocol, "localhost", port)
   } else if (configForFake === true) {
-    try {
-      fakeTequilaServer_ = new fakes.TequilaServer()
-      await promisify(fakeTequilaServer_, fakeTequilaServer_.start)()
-      setupFakeTequilaServer(protocol, "localhost", fakeTequilaServer.port)
-    } catch (e) {
-      throw diagnoseDependencies(e)
-    }
+    fakeTequilaServer_ = new fakes.TequilaServer()
+    await promisify(fakeTequilaServer_, fakeTequilaServer_.start)()
+    setupFakeTequilaServer(protocol, "localhost", fakeTequilaServer.port)
     console.log("Fake Tequila server listening at " +
       "https://localhost:" + fakeTequilaServer_.port + "/")
     _.extend(protocol, fakeTequilaServer_.getOptions())
@@ -217,23 +209,6 @@ async function setupFakeLocalServer(configForFake, protocol) {
     protocol.tequila_port = port
     protocol.agent = new https.Agent({ca: fakes.getCACert()})
  }
-}
-
-async function diagnoseDependencies (e) {
-  if (e.code !== 'MODULE_NOT_FOUND') {
-    return e
-  }
-
-  console.error(e)
-
-  const requirements = ["express", "pem", "ip", "fqdn"]
-  return new Meteor.Error(
-      'accounts-tequila-server:devDependencies',
-     `In order to use the fake Tequila server, you need to install its dependencies.
-Try
-
-  meteor npm i --save-dev ${requirements.join(" ")}`
-  )
 }
 
 /**
