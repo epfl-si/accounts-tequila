@@ -191,7 +191,8 @@ async function setupFakeLocalServer(configForFake, protocol) {
     if (configForFake.port) {
       console.log("Using fake Tequila server already running at port "
         + configForFake.port)
-      setupFakeTequilaServer(protocol, "localhost", configForFake.port)
+      setupFakeTequilaServer(protocol, configForFake.host || "localhost",
+        configForFake.port)
     } else {
       const fakeTequilaServer_ = new fakes.TequilaServer(configForFake)
       await promisify(fakeTequilaServer_, fakeTequilaServer_.start)()
