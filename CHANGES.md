@@ -1,3 +1,9 @@
+# Version 0.4.2
+
+- Bugfix for in-process fake Tequila server
+
+(v0.4.1 was a botched release on a mis-managed master branch)
+
 # Version 0.4.0
 
 - Upgrade passport-tequila to 0.2.0
