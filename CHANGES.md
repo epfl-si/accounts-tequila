@@ -1,3 +1,7 @@
+# Version 0.4.3
+
+- Support for latest contemporaneous Meteor version (2.3.4)
+
 # Version 0.4.2
 
 - Bugfix for in-process fake Tequila server
