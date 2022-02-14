@@ -1,3 +1,8 @@
+# Version 0.5.0
+
+- Support for latest Meteor version (2.6.x)
+- Rather than reaching out for `Meteor.users.rawCollection()` whose API just changed, use `Meteor.users.upsert()` with `{ bypassCollection2: true }`
+
 # Version 0.4.3
 
 - Support for latest contemporaneous Meteor version (2.3.4)
