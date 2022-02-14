@@ -224,15 +224,19 @@ async function setupFakeLocalServer(configForFake, protocol) {
  * @return Promise Resolves to the Meteor.user record when upsertion completes
  */
 function upsertUser(id, setAttributes) {
-  // https://stackoverflow.com/a/16362833/435004
-  const c = Meteor.users.rawCollection()
-  return promisify(c, c.findAndModify)(
-    // https://stackoverflow.com/a/22672586/435004
-    { _id: id },
-    [],   // sort
-    setAttributes,
-    { new: true, upsert: true }
-  )
+  if (Meteor.users.upsert) {  // Recent Meteor
+    return Meteor.users.upsert({ _id: id}, setAttributes, {bypassCollection2: true})
+  } else {
+    // https://stackoverflow.com/a/16362833/435004
+    const c = Meteor.users.rawCollection()
+    return promisify(c, c.findAndModify)(
+      // https://stackoverflow.com/a/22672586/435004
+      { _id: id },
+      [],   // sort
+      setAttributes,
+      { new: true, upsert: true }
+    )
+  }
 }
 
 function filterPersistentAttributes (a) {
