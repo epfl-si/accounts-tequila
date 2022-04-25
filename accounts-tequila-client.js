@@ -28,19 +28,19 @@ function __(/* args */) {
 // Documented in accounts-tequila-server.js
 function start (opts) {
   if (! opts) opts = {}
-  var queryString = window.location.search
+
+  const queryString = new URLSearchParams(window.location.search);
+
   if (! queryString) return
-  let tequilaKey
-  const locationWithoutTequilaKey = window.location.pathname +
-    queryString.replace(/([?&])key=([^&]*)(&|$)/,
-      function(matched, sep1, key, sep2) {
-        tequilaKey = key
-        return sep2 ? sep1 : ""   // Although in practice it looks like
-                                  // the Tequila key is always last
-      })
-  if (tequilaKey) {
-    window.history.replaceState({}, window.title, locationWithoutTequilaKey)
-    Accounts.callLoginMethod({ methodArguments: [{tequilaKey}] })
+
+  const tequilaKey = queryString.get('key')
+  const authCheckKey = queryString.get('auth_check')
+
+  if (tequilaKey && authCheckKey) {
+    queryString.delete('key')
+    queryString.delete('auth_check')
+    window.history.replaceState({}, window.title, `${location.pathname}${queryString.toString() ? '?' + queryString.toString() : ''}`)
+    Accounts.callLoginMethod({ methodArguments: [ {tequilaKey: tequilaKey, authCheckKey: authCheckKey} ] })
   }
 
   Accounts.onLoginFailure(opts.onLoginFailure || defaultLoginFailureHandler)

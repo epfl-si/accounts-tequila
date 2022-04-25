@@ -18,8 +18,8 @@ const debug = debug_('accounts-tequila')
  * @private
  */
 function handleTequilaProtectedResource(req, res, next, protocol) {
-  if (req.query && req.query.key) {
-    debug("Looks like user is back from Tequila, with key=" + req.query.key)
+  if (req.query && req.query.key && req.query.auth_check) {
+    debug("Looks like user is back from Tequila, with key=" + req.query.key + ", auth_key=" + req.query.auth_check)
     // Do *NOT* resolve the key with the Tequila server just yet. That key is
     // single-use; and we'd rather associate the Tequila credentials with the
     // Meteor session, rather than the current one-shot HTTP query which will be
@@ -141,15 +141,18 @@ export function start (opts) {
 
   // Meteor login handlers (still) cannot be async functions:
   Accounts.registerLoginHandler((params) => Promise.await(tequilaLogin(
-    startOptions, protocol, params.tequilaKey)))
+    startOptions, protocol, params)))
 }
 
-async function tequilaLogin (opts, protocol, key) {
-  if (! key) { return undefined }
+async function tequilaLogin (opts, protocol, params) {
+  const key = params.tequilaKey
+  const auth_check = params.authCheckKey
 
-  debug("tequila.authenticate with key=" + key)
+  if (! key || ! auth_check) { return undefined }
 
-  const tequilaAttributes = await promisify(protocol, protocol.fetchattributes)(key)
+  debug("tequila.authenticate with key=" + key + ", auth_check=" + auth_check)
+
+  const tequilaAttributes = await promisify(protocol, protocol.fetchattributes)(key, auth_check)
   const userId = await opts.getUserId(tequilaAttributes)
   if (! userId) {
     return { error: new Meteor.Error("Tequila:user-unknown") }
