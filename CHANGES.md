@@ -1,6 +1,10 @@
 # Version 0.6.2
 - Update to latest passport-tequila, to fix the fake tequila feature
 
+# Version 0.6.0
+
+- Upgrade to passport-tequila to 1.0.0 (latest)
+
 # Version 0.5.0
 
 - Support for latest Meteor version (2.6.x)
