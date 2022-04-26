@@ -148,7 +148,7 @@ async function tequilaLogin (opts, protocol, params) {
   const key = params.tequilaKey
   const auth_check = params.authCheckKey
 
-  if (! key || ! auth_check) { return undefined }
+  if (! (key && auth_check)) { return undefined }
 
   debug("tequila.authenticate with key=" + key + ", auth_check=" + auth_check)
 
