@@ -462,9 +462,9 @@
       "integrity": "sha1-tVOaqPwiWj0a0XlHbd8ja0QPUuQ="
     },
     "passport-tequila": {
-      "version": "1.0.0",
-      "resolved": "https://registry.npmjs.org/passport-tequila/-/passport-tequila-1.0.0.tgz",
-      "integrity": "sha512-WdI2G5IFAlKsgnwJ6PYFSNgMwN+zjDNKbH7XKqdlU7WdlEsIDyMOHpnEJTlrPgZh3sxmxyn0MUTcfiZkNt2VLA==",
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/passport-tequila/-/passport-tequila-1.0.1.tgz",
+      "integrity": "sha512-tQHjrCcaXCxhDHrlNH/orxc8+tEdAqYvKGdd8COqxi3WCGHd29NvzConq/gJVI9EQPUPoMJtV2wbyCOFcBBf3g==",
       "dependencies": {
         "debug": {
           "version": "2.6.9",
