@@ -1,3 +1,6 @@
+# Version 0.6.3
+- Fix the compatibility with SSLv3 by upgrading the library 'PEM'
+
 # Version 0.6.2
 - Update to latest passport-tequila, to fix the fake tequila feature
 
