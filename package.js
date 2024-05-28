@@ -24,8 +24,8 @@ Package.onUse((api) => {
 Npm.depends({
   "connect": "3.7.0",
   "connect-query": "1.0.0",
-  "debug": "4.1.1",
-  "passport-tequila": "1.0.3",
-  "micromatch": "4.0.2",
-  "@types/micromatch": "3.1.0",
+  "debug": "4.3.4",
+  "passport-tequila": "1.1.0",
+  "micromatch": "4.0.7",
+  "@types/micromatch": "4.0.7",
 })
