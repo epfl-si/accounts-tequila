@@ -1,3 +1,15 @@
+# Version 0.8.0
+
+- Feature: Allow `upsertUser` callback to be async
+- Bug fix: pass absolute URL to Tequila (computed in terms of `Meteor.absoluteUrl`)
+
+# Version 0.7.0
+
+- Upgrade to latest version of `accounts-tequila`
+- Un-bloat dependencies by dropping support for in-process fake Tequila server
+- Support Meteor version 3.0.0
+- Drop support for Meteor version 1.x
+
 # Version 0.6.3
 - Fix the compatibility with SSLv3 by upgrading the library 'PEM'
 
