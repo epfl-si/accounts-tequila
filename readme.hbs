@@ -23,30 +23,6 @@ Meteor.startup(function() {
 
 # Fake Tequila server
 
-This package is attuned to
-[passport-tequila](https://www.npmjs.com/package/passport-tequila)'s
-fake Tequila server. To use it, use one of the two methods in the
-paragraphs below.
-
-
-## In-process fake Tequila
-
-1. Create a `settings.json` file that contains <pre>
-{
-    "fake_tequila": {
-        "requestauth": {
-            "uniqueid": "243371",
-            "displayname": "Dominique Quatravaux",
-            "group": "epfl-dojo,idev-fsd"
-        }
-    }
-}</pre>
-1. Change your Meteor app to run <pre>Tequila.start({fakeLocalServer: Meteor.settings.fake_tequila }, ...)</pre>
-1. Run meteor with `meteor run --settings settings.json`
-
-
-## Out-of-process fake Tequila
-
 1. Clone `passport-tequila` outside of your Meteor project: <pre>git clone git@gitlab.com:epfl-sti/passport-tequila.git</pre>
 1. Create a `tequila.json` file that contains<pre>
 {
