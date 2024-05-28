@@ -29,12 +29,12 @@ function handleTequilaProtectedResource(req, res, next, protocol) {
     next()
   } else {
     const url = req.originalUrl
-    protocol.createrequest(req, res, function (err, results) {
+    protocol.createrequest(url, function (err, results) {
       if (err) {
         next(err)
       } else {
         debug("Redirecting user to Tequila for " + url)
-        protocol.requestauth(res, results)
+        res.redirect(protocol.requestauthRedirectUrl(results))
       }
     })
   }
