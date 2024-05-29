@@ -163,7 +163,7 @@ async function tequilaLogin (opts, protocol, params) {
   }
 
   if (opts.upsert) {
-    upsertUser(userId, await opts.upsert(tequilaAttributes))
+    await upsertUser(userId, await opts.upsert(tequilaAttributes))
   } else {
     // Give a client-side clue to nonexistent users.
     // If we return a nonexistent user ID here, Meteor will accept
