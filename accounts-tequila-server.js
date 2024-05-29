@@ -212,7 +212,7 @@ async function setupFakeLocalServer(configForFake, protocol) {
  * Upsert (update or insert) a record in Meteor.users
  *
  * Newly created users must have an _id that is a string (see
- * https://stackoverflow.com/a/24972966/435004). We use either
+ * https://stackoverflow.com/a/24972966). We use either
  * `tequila.uniqueid` (i.e. the person's SCIPER number) or
  * `tequila.user` (i.e. the person's GASPAR user name), in this order
  * of preference, depending on which is defined.
@@ -226,20 +226,8 @@ async function setupFakeLocalServer(configForFake, protocol) {
  *
  * @return Promise Resolves to the Meteor.user record when upsertion completes
  */
-function upsertUser(id, setAttributes) {
-  if (Meteor.users.upsert) {  // Recent Meteor
-    return Meteor.users.upsert({ _id: id}, setAttributes, {bypassCollection2: true})
-  } else {
-    // https://stackoverflow.com/a/16362833/435004
-    const c = Meteor.users.rawCollection()
-    return promisify(c, c.findAndModify)(
-      // https://stackoverflow.com/a/22672586/435004
-      { _id: id },
-      [],   // sort
-      setAttributes,
-      { new: true, upsert: true }
-    )
-  }
+async function upsertUser(id, setAttributes) {
+  return await Meteor.users.upsertAsync({ _id: id}, setAttributes, {bypassCollection2: true})
 }
 
 function filterPersistentAttributes (a) {

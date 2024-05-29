@@ -7,7 +7,7 @@ Package.describe({
 })
 
 Package.onUse((api) => {
-  api.versionsFrom(['METEOR@1.8.1', 'METEOR@2.3.2', '3.0-alpha.19'])
+  api.versionsFrom(['METEOR@2.3.2', '3.0-alpha.19'])
   api.use('modules')
   api.use('promise')
   api.use('ecmascript')
