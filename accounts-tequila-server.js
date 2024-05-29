@@ -28,8 +28,11 @@ function handleTequilaProtectedResource(req, res, next, protocol) {
     // and we'll validate it then (see below).
     next()
   } else {
-    const url = req.originalUrl
-    protocol.createrequest(url, function (err, results) {
+    let url = req.originalUrl
+    if (url.charAt(0) === '/') {
+      url = url.substring(1)
+    }
+    protocol.createrequest(Meteor.absoluteUrl(url || "."), function (err, results) {
       if (err) {
         next(err)
       } else {
