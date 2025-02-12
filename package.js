@@ -1,6 +1,6 @@
 Package.describe({
   name: 'epfl:accounts-tequila',
-  version: '0.9.0_1',
+  version: '0.9.0_2',
   summary: 'Log in to Web apps using EPFL\'s [Tequila](http://tequila.epfl.ch/)',
   git: 'https://github.com/epfl-si/accounts-tequila',
   documentation: 'README.md'
@@ -25,7 +25,7 @@ Npm.depends({
   "connect": "3.7.0",
   "connect-query": "1.0.0",
   "debug": "4.3.4",
-  "passport-tequila": "1.1.1-pre1.0",
+  "passport-tequila": "1.1.1-pre2.0",
   "micromatch": "4.0.7",
   "@types/micromatch": "4.0.7",
 })
