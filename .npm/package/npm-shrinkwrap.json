@@ -2,9 +2,9 @@
   "lockfileVersion": 4,
   "dependencies": {
     "@types/braces": {
-      "version": "3.0.4",
-      "resolved": "https://registry.npmjs.org/@types/braces/-/braces-3.0.4.tgz",
-      "integrity": "sha512-0WR3b8eaISjEW7RpZnclONaLFDf7buaowRHdqLp4vLj54AsSAYWfh3DRbfiYJY9XDxMgx1B4sE1Afw2PGpuHOA=="
+      "version": "3.0.5",
+      "resolved": "https://registry.npmjs.org/@types/braces/-/braces-3.0.5.tgz",
+      "integrity": "sha512-SQFof9H+LXeWNz8wDe7oN5zu7ket0qwMu5vZubW4GCJ8Kkeh6nBWUz87+KTz/G3Kqsrp0j/W253XJb3KMEeg3w=="
     },
     "@types/micromatch": {
       "version": "4.0.7",
@@ -116,9 +116,9 @@
       "integrity": "sha512-CB97UUvDKJde2V0KDWWB3lyf6PC3FaZP7YxZ2G8OAtn9p4HI9j9JLP9qjOGZFvyl8uwNT8qM+hGnz/n16NI7oA=="
     },
     "passport-tequila": {
-      "version": "1.1.0",
-      "resolved": "https://registry.npmjs.org/passport-tequila/-/passport-tequila-1.1.0.tgz",
-      "integrity": "sha512-tiRVLBsAYVrKN24J6pqAf+My3+7UyxIt4dqMgswkNxC8caiOURWGYwFXwJTTk3BC63nrHBI96Tp4k/qj7yHthw==",
+      "version": "1.2.0",
+      "resolved": "https://registry.npmjs.org/passport-tequila/-/passport-tequila-1.2.0.tgz",
+      "integrity": "sha512-o0WyL/EeIlnYWgLZPH9SPOgCCZuVGqo3Z1dws12gmgjmenO5McKK/WJM6C0nkr3KZoBow2x/qI9GeEJ1wz1IUA==",
       "dependencies": {
         "debug": {
           "version": "2.6.9",
