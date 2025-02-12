@@ -67,6 +67,8 @@ export const defaultOptions = Object.freeze({
  * @param {string} opts.require Passed to `passport-tequila`'s `Protocol` object
  * @param {string} opts.tequila_host Passed to `passport-tequila`'s `Protocol` object
  * @param {string} opts.tequila_port Passed to `passport-tequila`'s `Protocol` object
+ * @param {string} opts.tequila_createrequest_options Passed to `passport-tequila`'s `Protocol` object
+ * @param {string} opts.tequila_fethchattributes_options Passed to `passport-tequila`'s `Protocol` object
  * @param {string[]} opts.bypass    List of URL patterns that are *not* redirected
  *                                  to Tequila
  * @param {string[]} opts.control   List of URL patterns that are redirected to
