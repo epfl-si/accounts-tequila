@@ -146,15 +146,14 @@ export function start (opts) {
   })
   WebApp.connectHandlers.use(connect)
 
-  // Meteor login handlers (still) cannot be async functions:
-  Accounts.registerLoginHandler(Meteor.wrapAsync(async (params) => {
+  Accounts.registerLoginHandler(async (params) => {
     try {
-      await tequilaLogin(startOptions, protocol, params)
+      return await tequilaLogin(startOptions, protocol, params)
       console.log("tequilaLogin successful")
     } catch (e) {
       console.error("tequilaLogin failure:", e)
     }
-  }))
+  })
 }
 
 async function tequilaLogin (opts, protocol, params) {
