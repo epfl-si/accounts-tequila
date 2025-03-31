@@ -1,13 +1,13 @@
 Package.describe({
   name: 'epfl:accounts-tequila',
-  version: '0.9.0',
+  version: '0.10.0',
   summary: 'Log in to Web apps using EPFL\'s [Tequila](http://tequila.epfl.ch/)',
   git: 'https://github.com/epfl-si/accounts-tequila',
   documentation: 'README.md'
 })
 
 Package.onUse((api) => {
-  api.versionsFrom(['METEOR@2.3.2', '3.0-alpha.19'])
+  api.versionsFrom(['METEOR@2.9.0', '3.0-alpha.19'])
   api.use('modules')
   api.use('promise')
   api.use('ecmascript')
