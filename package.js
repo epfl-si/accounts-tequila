@@ -25,7 +25,7 @@ Npm.depends({
   "connect": "3.7.0",
   "connect-query": "1.0.0",
   "debug": "4.3.4",
-  "passport-tequila": "1.2.0",
+  "passport-tequila": "1.2.1",
   "micromatch": "4.0.7",
   "@types/micromatch": "4.0.7",
 })
