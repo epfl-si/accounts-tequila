@@ -37,7 +37,7 @@ function handleTequilaProtectedResource(req, res, next, protocol) {
         next(err)
       } else {
         debug("Redirecting user to Tequila for " + url)
-        res.statusCode = 301
+        res.statusCode = 302
         res.setHeader("Location", protocol.requestauthRedirectUrl(results))
         res.end()
       }
