@@ -1,3 +1,24 @@
+# Version 0.11.0
+
+- Bug fix: must redirect to Tequila with HTTP status code 302, to prevent caching
+
+# Version 0.10.1
+
+(Unknown)
+
+# Version 0.10.0
+
+(Unknown)
+
+# Version 0.9.0
+
+(Unknown)
+
+# Version 0.8.0
+
+- Feature: Allow `upsertUser` callback to be async
+- Bug fix: pass absolute URL to Tequila (computed in terms of `Meteor.absoluteUrl`)
+
 # Version 0.8.0
 
 - Feature: Allow `upsertUser` callback to be async
