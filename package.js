@@ -13,7 +13,6 @@ Package.onUse((api) => {
   api.use('ecmascript')
   api.use('ejson')
   api.use('accounts-base')
-  api.use('underscore')
   api.use('webapp')
   api.use('tomwasd:history-polyfill@0.0.1')
   api.use('tap:i18n@1.0.0 || 0.0.0', {weak: true})
@@ -22,10 +21,11 @@ Package.onUse((api) => {
 })
 
 Npm.depends({
+  "@types/micromatch": "4.0.7",
   "connect": "3.7.0",
   "connect-query": "1.0.0",
   "debug": "4.3.4",
-  "passport-tequila": "1.2.1",
+  "lodash": "4.17.21",
   "micromatch": "4.0.7",
-  "@types/micromatch": "4.0.7",
+  "passport-tequila": "1.2.1",
 })

@@ -2,7 +2,7 @@ import https from 'https'
 import { Meteor } from 'meteor/meteor'
 import { WebApp } from 'meteor/webapp'
 import { Promise } from 'meteor/promise'
-import { _ } from 'meteor/underscore'
+import _ from 'lodash'
 
 import connect_ from 'connect'
 import connectQuery from 'connect-query'
